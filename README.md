@@ -12,14 +12,15 @@ AI-DLC uses [Amazon Q Rules](https://docs.aws.amazon.com/amazonq/latest/qdevelop
 
 ```bash
 git clone <this-repo>
+
 cd my-project # assuming your project is located under the same parent folder as the cloned repo
+
 mkdir -p .amazonq/rules && cp -R ../aidlc-workflows/aidlc-rules/aws-aidlc-rules .amazonq/rules/ && cp -R ../aidlc-workflows/aidlc-rules/aws-aidlc-rule-details .amazonq/
 ```
 
 To confirm that the Amazon Q Rules are correctly loaded in your IDE, follow these steps:
 
 1. In the Amazon Q Chat window, locate the `Rules` button in the lower right corner and click on it.
-
 2. Verify that you see entries for `.amazonq/rules/aws-aidlc-rules` in the displayed list of rules.
 
 If you do not see the `aws-aidlc-rules` rules loaded, please check the directory where you previously issued the `mkdir` and `cp` commands.  
@@ -32,16 +33,16 @@ AI-DLC uses [Kiro Steering Files](https://kiro.dev/docs/cli/steering/) within yo
 
 ```bash
 git clone <this-repo>
+
 cd my-project # assuming your project is located under the same parent folder as the cloned repo
+
 mkdir -p .kiro/steering && cp -R ../aidlc-workflows/aidlc-rules/aws-aidlc-rules .kiro/steering/ && cp -R ../aidlc-workflows/aidlc-rules/aws-aidlc-rule-details .kiro/
 ```
 
 To confirm that the AI-DLC rules are correctly loaded in your Kiro CLI, follow these steps:
 
 1. Start Kiro CLI: `kiro-cli`
-
 2. Check your context contents: `/context show`
-
 3. Verify that you see all entries for `.kiro/steering/aws-aidlc-rules` in the displayed list of rules.
 
 If you do not see the `aws-aidlc-rules` rules loaded, please check the directory where you previously issued the `mkdir` and `cp` commands.  
