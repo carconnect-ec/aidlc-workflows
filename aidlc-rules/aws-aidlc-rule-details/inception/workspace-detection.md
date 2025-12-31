@@ -11,7 +11,7 @@ Check if `aidlc-docs/aidlc-state.md` exists:
 ## Step 2: Scan Workspace for Existing Code
 
 **Determine if workspace has existing code:**
-- Scan workspace for source code files (.java, .py, .js, .ts, etc.)
+- Scan workspace for source code files (.java, .py, .js, .ts, .jsx, .tsx, .kt, .kts, .scala, .groovy, .go, .rs, .rb, .php, .c, .h, .cpp, .hpp, .cc, .cs, .fs, etc.)
 - Check for build files (pom.xml, package.json, build.gradle, etc.)
 - Look for project structure indicators
 
