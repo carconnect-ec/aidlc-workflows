@@ -11,17 +11,15 @@ Have one of our supported platforms/tools for Assisted AI Coding installed:
 - [Kiro](https://kiro.dev/)
 - [Amazon Q Developer IDE plugin](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/q-in-IDE.html)
 
-**Using Cursor?** See [CURSOR_README.md](CURSOR_README.md) for Cursor-specific setup instructions.
-
-**Using Cline?** See [CLINE_README.md](CLINE_README.md) for Cline-specific setup instructions.
-
 ## Choose Your Platform
 
-**Using Cursor?** See [CURSOR_README.md](CURSOR_README.md) for Cursor-specific setup instructions.
+Select your AI coding assistant platform for detailed setup instructions:
 
-**Using Cline?** See [CLINE_README.md](CLINE_README.md) for Cline-specific setup instructions.
-
-**Using Amazon Q Developer IDE, Kiro, or Kiro CLI?** Continue reading below.
+- **Amazon Q Developer VSCode Plugin, Kiro, or Kiro CLI** - Continue reading below
+- **[Cursor IDE](CURSOR_README.md)** - Setup instructions for Cursor IDE
+- **[Cline](CLINE_README.md)** - Setup instructions for Cline VS Code plugin
+- **[Claude Code](CLAUDE_README.md)** - Setup instructions for Claude Code CLI
+- **[GitHub Copilot](COPILOT_README.md)** - Setup instructions for GitHub Copilot
 
 ## Quick Start
 
@@ -184,6 +182,11 @@ AI-DLC follows a structured three-phase approach that adapts to your project's c
 - **Risk-Based**: Complex changes get comprehensive treatment, simple changes stay efficient
 - **Question-Driven**: Structured multiple-choice questions in files, not chat
 - **Always in Control**: Review execution plans and approve each phase
+
+## Additional Resources
+
+- **[Contributing Guidelines](CONTRIBUTING.md)** - How to contribute to this project
+- **[Code of Conduct](CODE_OF_CONDUCT.md)** - Community guidelines and standards
 
 ## Security
 
