@@ -38,7 +38,10 @@ Your project should look like:
 
 To verify the rules are loaded:
 
-- **Kiro IDE**: Open the steering files panel and confirm entries for `.kiro/steering/aws-aidlc-rules`.
+- **Kiro IDE**: Open the steering files panel and confirm you see an entry for `core-workflow` under `Workspace` as shown in the screenshot below.
+
+![AI-DLC Rules in Kiro IDE](./assets/images/kiro-ide-aidlc-rules-loaded.png?raw=true "AI-DLC Rules in Kiro IDE")
+
 - **Kiro CLI**: Run `kiro-cli`, then `/context show`, and confirm entries for `.kiro/steering/aws-aidlc-rules`.
 
 ![AI-DLC Rules in Kiro CLI](./assets/images/kiro-cli-aidlc-rules-loaded.png?raw=true "AI-DLC Rules in Kiro CLI")
