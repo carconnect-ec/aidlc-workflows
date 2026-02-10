@@ -4,6 +4,7 @@ AI-DLC is an intelligent software development workflow that adapts to your needs
 
 ## Table of Contents
 
+- [Tenets](#tenets)
 - [Prerequisites](#prerequisites)
 - [Quick Start](#quick-start)
 - [Platform-Specific Setup](#platform-specific-setup)
@@ -21,31 +22,62 @@ AI-DLC is an intelligent software development workflow that adapts to your needs
 
 ---
 
+## Tenets
+
+These are our core principles to guide our decision making.
+
+- **No duplication**. The source of truth lives in one place. If we add support for new tools or formats that require specific files, we generate them from the source rather than maintaining separate copies.
+
+- **Methodology first**. AI-DLC is fundamentally a methodology, not a tool. Users shouldn't need to install anything to get started. That said, we're open to convenience tooling (scripts, CLIs) down the road if it helps users adopt or extend the methodology.
+
+- **Reproducible**. Rules should be clear enough that different models produce similar outcomes. We know models behave differently, but the methodology should minimize variance through explicit guidance.
+
+- **Agnostic**. The methodology works with any IDE, agent, or model. We don't tie ourselves to specific tools or vendors.
+
+- **Human in the loop**. Critical decisions require explicit user confirmation. The agent proposes, the human approves.
+
+---
+
 ## Prerequisites
 
 Have one of our supported platforms/tools for Assisted AI Coding installed:
 
 | Platform | Installation Link |
 |----------|------------------|
-| Amazon Q Developer IDE Plugin | [Install](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/q-in-IDE.html) |
-| Kiro CLI | [Install](https://kiro.dev/cli/) |
 | Kiro | [Install](https://kiro.dev/) |
+| Kiro CLI | [Install](https://kiro.dev/cli/) |
+| Amazon Q Developer IDE Plugin | [Install](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/q-in-IDE.html) |
 | Cursor IDE | [Install](https://cursor.com/) |
 | Cline VS Code Extension | [Install](https://marketplace.visualstudio.com/items?itemName=saoudrizwan.claude-dev) |
 | Claude Code CLI | [Install](https://github.com/anthropics/claude-code) |
 | GitHub Copilot | [Install](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot) + [Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat) |
 
+
 ---
 
-## Quick Start
+## Get the AIDLC
 
-### Step 1: Clone this Repository
+### From Packaged Zip
+
+1. Download the latest release zip from the [Releases page](../../releases/latest) to a folder **outside** your project directory (e.g., `~/Downloads`).
+2. Extract the zip. It contains an `aidlc-rules/` folder with two subdirectories:
+   - `aws-aidlc-rules/` — the core AI-DLC workflow rules
+   - `aws-aidlc-rule-details/` — supporting documents referenced by the rules
+3. Copy both folders into your project, following the setup for your platform below.
+
+> **Note**: The extracted folder may contain a top-level directory (e.g., `aidlc-workflows-0.1.0/`). Navigate into it first so that `aidlc-rules/` is directly accessible.
+
+---
+
+### Clone from Repository
+
+#### Step 1: Clone this Repository
 
 ```bash
 git clone <this-repo>
 ```
 
-### Step 2: Create a New Project Folder
+#### Step 2: Create a New Project Folder
 
 **Unix/Linux/macOS:**
 ```bash
@@ -65,7 +97,7 @@ mkdir <my-project>
 cd <my-project>
 ```
 
-### Step 3: Follow Platform-Specific Setup
+#### Step 3: Follow Platform-Specific Setup
 
 Choose your platform below and follow the setup instructions.
 

@@ -1,0 +1,63 @@
+# Release Pipeline
+#
+# This workflow handles versioning and distribution of the AI-DLC methodology.
+# It triggers when you push a version tag and:
+#
+#   1. Creates distribution artifact:
+#      - ai-dlc-rules-vX.X.X.zip (Rules format for Amazon Q, Kiro, etc.)
+#   2. Publishes a GitHub Release with artifact attached
+#
+# Note: Changelog is generated separately by changelog.yml after release is published.
+#
+# Usage:
+#   git tag v1.2.0
+#   git push origin v1.2.0
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Extract version
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Create release artifact
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          zip -r "ai-dlc-rules-v${VERSION}.zip" aidlc-rules/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
+        with:
+          name: "AI-DLC Workflow v${{ steps.version.outputs.version }}"
+          body: |
+            Release v${{ steps.version.outputs.version }}
+            
+            See [CHANGELOG.md](CHANGELOG.md) for details.
+            
+            ## Downloads
+            - **ai-dlc-rules** - Rules format (Amazon Q, Kiro, etc.)
+          files: |
+            ai-dlc-rules-v${{ steps.version.outputs.version }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

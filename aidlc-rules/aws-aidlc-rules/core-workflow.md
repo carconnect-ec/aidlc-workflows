@@ -97,7 +97,7 @@ This directory is used consistently across all platforms (Cline, Kiro CLI, Amazo
 2. Load all steps from `inception/reverse-engineering.md`
 3. Execute reverse engineering:
    - Analyze all packages and components
-   - Generate a busienss overview of the whole system covering the business transactions
+   - Generate a business overview of the whole system covering the business transactions
    - Generate architecture documentation
    - Generate code structure documentation
    - Generate API documentation
@@ -453,7 +453,10 @@ The Operations stage will eventually include:
 - **MANDATORY**: Record every user response with timestamp after receiving it
 - **CRITICAL**: ALWAYS append changes to EDIT audit.md file, NEVER use tools and commands that completely overwrite its contents
 - **CRITICAL**: Using file writing tools and commands that overwrite contents of the entire audit.md and cause duplication
-- Use ISO 8601 format for timestamps (YYYY-MM-DDTHH:MM:SSZ)
+- When adding an entry to audit.md:
+  1. Run a system command to get the current date and time in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). Use whatever command is appropriate for the current OS and shell environment.
+  2. Use the command output exactly as the **Timestamp** value.
+  Do not use placeholder (e.g., T00:00:00Z), estimated, or fabricated times.
 - Include stage context for each entry
 
 ### Audit Log Format:
