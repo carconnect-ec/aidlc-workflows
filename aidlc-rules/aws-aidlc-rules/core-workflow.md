@@ -11,9 +11,12 @@ The AI model intelligently assesses what stages are needed based on:
 4. Risk and impact assessment
 
 ## MANDATORY: Rule Details Loading
-**CRITICAL**: When performing any phase, you MUST read and use relevant content from rule detail files in `.aidlc-rule-details/` directory.
+**CRITICAL**: When performing any phase, you MUST read and use relevant content from rule detail files. Check these paths in order and use the first one that exists:
+- `.aidlc-rule-details/` (Cursor, Cline, Claude Code, GitHub Copilot)
+- `.kiro/aws-aidlc-rule-details/` (Kiro IDE and CLI)
+- `.amazonq/aws-aidlc-rule-details/` (Amazon Q Developer)
 
-This directory is used consistently across all platforms (Cline, Kiro CLI, Amazon Q, Cursor).
+All subsequent rule detail file references (e.g., `common/process-overview.md`, `inception/workspace-detection.md`) are relative to whichever rule details directory was resolved above.
 
 **Common Rules**: ALWAYS load common rules at workflow start:
 - Load `common/process-overview.md` for workflow overview
@@ -42,7 +45,7 @@ This directory is used consistently across all platforms (Cline, Kiro CLI, Amazo
 **CRITICAL**: When starting ANY software development request, you MUST display the welcome message.
 
 **How to Display Welcome Message**:
-1. Load the welcome message from `.aidlc-rule-details/common/welcome-message.md`
+1. Load the welcome message from `common/welcome-message.md` (in the resolved rule details directory)
 2. Display the complete message to the user
 3. This should only be done ONCE at the start of a new workflow
 4. Do NOT load this file in subsequent interactions to save context space
