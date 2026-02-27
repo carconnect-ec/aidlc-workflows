@@ -1,0 +1,17 @@
+{
+  "name": "aidlc-workflows",
+  "version": "1.0.0",
+  "description": "Configuración de AI-DLC para proyectos CarConnect",
+  "bin": {
+    "aidlc-workflows": "./scripts/setup-aidlc.js"
+  },
+  "files": [
+    "scripts/",
+    "aidlc-rules/"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "UNLICENSED",
+  "private": true
+}
