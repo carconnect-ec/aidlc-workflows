@@ -26,6 +26,15 @@ function removeDir(dir) {
   }
 }
 
+// Elimina un directorio solo si está vacío
+function removeIfEmpty(dir) {
+  if (!fs.existsSync(dir)) return;
+  if (fs.readdirSync(dir).length === 0) {
+    fs.rmSync(dir, { recursive: true, force: true });
+    log(`Eliminado (vacío): ${path.relative(PROJECT_ROOT, dir)}`);
+  }
+}
+
 function log(msg) {
   console.log(`  ${msg}`);
 }
@@ -48,7 +57,6 @@ function addToGitignore(entries) {
     ? fs.readFileSync(gitignorePath, 'utf8')
     : '';
 
-  // Normaliza el contenido existente para evitar duplicados sin importar el formato
   const existingNormalized = existing.split('\n').map(normalizeIgnoreEntry);
   const missing = entries.filter(e => !existingNormalized.includes(normalizeIgnoreEntry(e)));
 
@@ -57,6 +65,19 @@ function addToGitignore(entries) {
     log(`.gitignore: ${missing.join(', ')}`);
   } else {
     log('.gitignore: sin cambios.');
+  }
+}
+
+function removeFromGitignore() {
+  const gitignorePath = path.join(PROJECT_ROOT, '.gitignore');
+  if (!fs.existsSync(gitignorePath)) return;
+
+  const content = fs.readFileSync(gitignorePath, 'utf8');
+  // Elimina el bloque "# AI-DLC\n..." agregado por este script
+  const cleaned = content.replace(/\n# AI-DLC\n[^\n]+\n/g, '\n').replace(/\n{3,}/g, '\n\n');
+  if (cleaned !== content) {
+    fs.writeFileSync(gitignorePath, cleaned);
+    log('.gitignore: entrada de AI-DLC eliminada.');
   }
 }
 
@@ -89,7 +110,7 @@ function updateClaudeMd(importLine) {
   }
 }
 
-// Limpia la entrada de AI-DLC de CLAUDE.md al cambiar a un modo sin Claude Code
+// Limpia la entrada de AI-DLC de CLAUDE.md
 function cleanClaudeMd() {
   const claudeMdPath = path.join(PROJECT_ROOT, 'CLAUDE.md');
   if (!fs.existsSync(claudeMdPath)) return;
@@ -100,7 +121,6 @@ function cleanClaudeMd() {
   if (idx === -1) return;
 
   lines.splice(idx, 1);
-  // Elimina líneas vacías redundantes al inicio
   const cleaned = lines.join('\n').replace(/^\n+/, '');
   if (cleaned.trim() === '') {
     fs.unlinkSync(claudeMdPath);
@@ -129,20 +149,16 @@ function setupClaudeCode() {
   // Limpia todo lo de Kiro si venía de modo B o C
   removeDir(path.join(PROJECT_ROOT, '.kiro', 'steering', 'aws-aidlc-rules'));
   removeDir(path.join(PROJECT_ROOT, '.kiro', 'aws-aidlc-rule-details'));
+  removeIfEmpty(path.join(PROJECT_ROOT, '.kiro', 'steering'));
+  removeIfEmpty(path.join(PROJECT_ROOT, '.kiro'));
 
-  // Rule details para Claude Code en .aidlc-rule-details/
   log('Copiando rule details...');
   copyDir(SOURCE_DETAILS, path.join(PROJECT_ROOT, '.aidlc-rule-details'));
 
-  // core-workflow.md va en su propia carpeta, separado de los rule details
   log('Copiando core-workflow...');
   copyDir(SOURCE_RULES, path.join(PROJECT_ROOT, '.aidlc-rules'));
 
-  // CLAUDE.md importa el core-workflow desde .aidlc-rules/
   updateClaudeMd('@.aidlc-rules/core-workflow.md');
-
-  // Solo aidlc-docs/ se ignora — el resto se commitea
-  addToGitignore(['/aidlc-docs/']);
 }
 
 function setupKiro() {
@@ -151,15 +167,11 @@ function setupKiro() {
   removeDir(path.join(PROJECT_ROOT, '.aidlc-rules'));
   cleanClaudeMd();
 
-  // Estructura oficial de Kiro
   log('Copiando steering rules...');
   copyDir(SOURCE_RULES, path.join(PROJECT_ROOT, '.kiro', 'steering', 'aws-aidlc-rules'));
 
   log('Copiando rule details...');
   copyDir(SOURCE_DETAILS, path.join(PROJECT_ROOT, '.kiro', 'aws-aidlc-rule-details'));
-
-  // Solo aidlc-docs/ se ignora — el resto se commitea
-  addToGitignore(['/aidlc-docs/']);
 }
 
 function setupBoth() {
@@ -167,7 +179,6 @@ function setupBoth() {
   removeDir(path.join(PROJECT_ROOT, '.aidlc-rule-details'));
   removeDir(path.join(PROJECT_ROOT, '.aidlc-rules'));
 
-  // Estructura de Kiro (steering + rule details)
   log('Copiando steering rules...');
   copyDir(SOURCE_RULES, path.join(PROJECT_ROOT, '.kiro', 'steering', 'aws-aidlc-rules'));
 
@@ -176,9 +187,17 @@ function setupBoth() {
 
   // CLAUDE.md importa desde el steering de Kiro — una sola copia, sin duplicación
   updateClaudeMd('@.kiro/steering/aws-aidlc-rules/core-workflow.md');
+}
 
-  // Solo aidlc-docs/ se ignora — el resto se commitea
-  addToGitignore(['/aidlc-docs/']);
+function uninstall() {
+  removeDir(path.join(PROJECT_ROOT, '.aidlc-rules'));
+  removeDir(path.join(PROJECT_ROOT, '.aidlc-rule-details'));
+  removeDir(path.join(PROJECT_ROOT, '.kiro', 'steering', 'aws-aidlc-rules'));
+  removeDir(path.join(PROJECT_ROOT, '.kiro', 'aws-aidlc-rule-details'));
+  removeIfEmpty(path.join(PROJECT_ROOT, '.kiro', 'steering'));
+  removeIfEmpty(path.join(PROJECT_ROOT, '.kiro'));
+  cleanClaudeMd();
+  removeFromGitignore();
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -198,13 +217,22 @@ if (previousMode) {
 console.log('¿Qué herramienta vas a usar en este proyecto?\n');
 console.log('  A) Claude Code');
 console.log('  B) Kiro');
-console.log('  C) Ambas\n');
+console.log('  C) Ambas');
+console.log('  D) Desinstalar AI-DLC de este proyecto\n');
 
 rl.question('Respuesta: ', (answer) => {
   rl.close();
   console.log();
 
   const choice = answer.trim().toUpperCase();
+
+  if (choice === 'D') {
+    console.log('Desinstalando AI-DLC...\n');
+    uninstall();
+    console.log('\nAI-DLC eliminado del proyecto.\n');
+    return;
+  }
+
   const modeMap = {
     'A': { label: 'Claude Code', fn: setupClaudeCode },
     'B': { label: 'Kiro',        fn: setupKiro },
@@ -212,7 +240,7 @@ rl.question('Respuesta: ', (answer) => {
   };
 
   if (!modeMap[choice]) {
-    console.error('Opción no válida. Usa A, B o C.');
+    console.error('Opción no válida. Usa A, B, C o D.');
     process.exit(1);
   }
 
@@ -227,6 +255,6 @@ rl.question('Respuesta: ', (answer) => {
 
   console.log('\nAI-DLC listo.\n');
   console.log(`  Commitea: ${commitFiles[choice]}`);
-  console.log('  Ignora:   aidlc-docs/ (artefactos de sesión, ya en .gitignore)\n');
+  console.log('  Commitea también: aidlc-docs/ al cerrar cada feature (es documentación del proyecto)\n');
   console.log('  Para usar: "Using AI-DLC, [descripción de tu tarea]"\n');
 });

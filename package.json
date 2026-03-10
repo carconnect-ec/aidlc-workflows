@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Configuración de AI-DLC para proyectos CarConnect",
   "bin": {
-    "aidlc-workflows": "./scripts/setup-aidlc.js"
+    "setup-aidlc": "./scripts/setup-aidlc.js"
   },
   "files": [
     "scripts/",

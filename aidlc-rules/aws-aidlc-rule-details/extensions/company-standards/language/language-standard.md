@@ -48,12 +48,13 @@ X) Otro (describir después del tag [Answer]: abajo)
 - Descripciones de hallazgos y recomendaciones
 - Mensajes de error o advertencia
 
-**Verificación**:
-- El mensaje de bienvenida está en español
-- Las preguntas al usuario están en español
-- Las opciones A/B/C/D/X de las preguntas están descritas en español
-- Los mensajes de completación de fase están en español
-- No hay párrafos o secciones en inglés dirigidas al usuario
+**Verificación** (checklists concretos por artefacto):
+- El mensaje de bienvenida (welcome message) comienza con un saludo en español — si aparece en inglés, es hallazgo bloqueante
+- Cada pregunta de aclaración tiene su enunciado en español, incluyendo las opciones A/B/C/D/X
+- El mensaje de completación de cada fase (encabezado, secciones, opciones de acción) está íntegramente en español
+- Las etiquetas de sección como "Stage Complete", "Next Steps", "Key Decisions" NO deben aparecer en inglés — deben traducirse (ej: "Etapa Completa", "Próximos Pasos", "Decisiones Clave")
+- Los mensajes de error o advertencia están en español
+- No existe ningún párrafo o bloque de texto dirigido al usuario que esté en inglés
 
 ---
 
@@ -65,12 +66,14 @@ X) Otro (describir después del tag [Answer]: abajo)
 - Artefactos de inception (requirements, user stories, application design, workflow planning)
 - Artefactos de construction (functional design, NFR, infrastructure design, build and test)
 
-**Verificación**:
-- Los títulos y secciones de los artefactos están en español
-- Las descripciones de requisitos están en español
-- Las user stories están redactadas en español
-- Los comentarios de auditoría están en español
-- Los planes de construcción están en español
+**Verificación** (checklists concretos por artefacto):
+- Los títulos H1/H2/H3 de cada artefacto están en español
+- Las descripciones de requisitos funcionales y no funcionales están en español
+- Las user stories usan el formato "Como [rol], quiero [acción], para [beneficio]" en español
+- Las entradas en `aidlc-docs/audit.md` tienen su contexto y notas en español (los valores literales del usuario se reproducen tal cual)
+- `aidlc-docs/aidlc-state.md` tiene sus secciones y estados descritos en español
+- Los planes de construcción (functional design, NFR, infrastructure) están en español
+- Las instrucciones de build y test en `build-and-test/` están en español
 
 ---
 

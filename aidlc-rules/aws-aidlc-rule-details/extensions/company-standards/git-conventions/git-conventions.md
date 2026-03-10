@@ -86,6 +86,20 @@ refactor/modulo-de-precios
 
 ---
 
+## Rule GIT-03: Ejemplos de git en instrucciones de Build and Test
+
+**Regla**: El archivo `aidlc-docs/construction/build-and-test/build-and-test-summary.md` y cualquier archivo de instrucciones bajo `build-and-test/` que incluya comandos o ejemplos de git DEBE usar mensajes de commit y nombres de branch que cumplan GIT-01 y GIT-02.
+
+**Verificación**:
+- Cualquier `git commit -m "..."` de ejemplo usa formato Conventional Commits (GIT-01)
+- Cualquier nombre de branch de ejemplo sigue el formato `<tipo>/<kebab-case>` (GIT-02)
+- No aparecen ejemplos con mensajes genéricos como `"initial commit"`, `"changes"`, `"wip"`, `"update"` sin tipo ni scope
+- No aparecen nombres de branch como `feature/myFeature`, `dev`, `develop`, `my-branch` que no cumplan GIT-02
+
+Si el archivo de build and test no contiene ningún ejemplo de git, marcar esta regla como **N/A**.
+
+---
+
 ## Enforcement Integration
 
 Estas reglas son constraints transversales que aplican principalmente en las fases de Construction y en instrucciones de Build and Test. En cada fase relevante:
