@@ -225,17 +225,17 @@ Las extensiones aplican como **constraints bloqueantes** en todos los proyectos 
 
 ### Resumen de extensiones
 
-| Extensión | Reglas | Cuándo activa |
-|---|---|---|
-| `company-standards/language` | LANG-01/02/03 | Siempre |
-| `company-standards/git-conventions` | GIT-01/02/03 | Siempre |
-| `security/baseline` | SECURITY-01…15 | Siempre |
-| `compliance/data-privacy` | PRIVACY-01…06 | Features con PII de usuarios |
-| `compliance/marketplace-trust` | TRUST-01…06 | Features de listados, búsqueda o transacciones |
-| `performance/search-inventory` | PERF-01…06 | Features de búsqueda o listado de inventario |
-| `testing/marketplace-flows` | TEST-01…04 | Features en flujos críticos end-to-end |
-| `data-quality/vehicle-data` | VDATA-01…05 | Features que crean o modifican datos de vehículos |
-| `accessibility/wcag-baseline` | A11Y-01…05 | Features con interfaz de usuario |
+| Extensión                           | Reglas         | Cuándo activa                                     |
+| ----------------------------------- | -------------- | ------------------------------------------------- |
+| `company-standards/language`        | LANG-01/02/03  | Siempre                                           |
+| `company-standards/git-conventions` | GIT-01/02/03   | Siempre                                           |
+| `security/baseline`                 | SECURITY-01…15 | Siempre                                           |
+| `compliance/data-privacy`           | PRIVACY-01…06  | Features con PII de usuarios                      |
+| `compliance/marketplace-trust`      | TRUST-01…06    | Features de listados, búsqueda o transacciones    |
+| `performance/search-inventory`      | PERF-01…06     | Features de búsqueda o listado de inventario      |
+| `testing/marketplace-flows`         | TEST-01…04     | Features en flujos críticos end-to-end            |
+| `data-quality/vehicle-data`         | VDATA-01…05    | Features que crean o modifican datos de vehículos |
+| `accessibility/wcag-baseline`       | A11Y-01…05     | Features con interfaz de usuario                  |
 
 ---
 
@@ -333,12 +333,12 @@ Qué bloquea si está activa:
 
 ```markdown
 ❌ Hallazgo PRIVACY-01 — Catálogo de PII incompleto
-   El Functional Design del módulo de registro no lista qué campos de PII
-   se almacenan ni con qué propósito. Requerido antes de continuar.
+El Functional Design del módulo de registro no lista qué campos de PII
+se almacenan ni con qué propósito. Requerido antes de continuar.
 
 ❌ Hallazgo PRIVACY-05 — Logs con PII expuesta
-   El diseño del servicio de registro incluye logging del email completo
-   del usuario. Debe enmascararse (ej: ro***@gmail.com).
+El diseño del servicio de registro incluye logging del email completo
+del usuario. Debe enmascararse (ej: ro\*\*\*@gmail.com).
 ```
 
 ---
@@ -351,17 +351,17 @@ Qué verifica el agente en el diseño:
 
 ```markdown
 ✅ TRUST-01 — Límites de publicación documentados
-   Functional Design especifica: máximo 3 listados activos para cuentas
-   particulares, configurable por administradores sin cambio de código.
+Functional Design especifica: máximo 3 listados activos para cuentas
+particulares, configurable por administradores sin cambio de código.
 
 ✅ TRUST-02 — Validación de VIN documentada
-   El endpoint POST /listings valida: 17 caracteres alfanuméricos,
-   sin I/O/Q, dígito verificador calculado. VINs duplicados en listados
-   activos generan alerta de moderación.
+El endpoint POST /listings valida: 17 caracteres alfanuméricos,
+sin I/O/Q, dígito verificador calculado. VINs duplicados en listados
+activos generan alerta de moderación.
 
 ❌ TRUST-03 — Rate limiting no documentado
-   El diseño no especifica límites de requests en GET /search.
-   Requerido: documentar throttling por IP y por usuario autenticado.
+El diseño no especifica límites de requests en GET /search.
+Requerido: documentar throttling por IP y por usuario autenticado.
 ```
 
 ---
@@ -372,17 +372,17 @@ Qué verifica el agente en el diseño:
 
 ```markdown
 ✅ PERF-01 — NFR de latencia documentado
-   NFR Requirements especifica: P95 < 300ms, P99 < 500ms para
-   GET /search con hasta 50,000 vehículos en inventario.
+NFR Requirements especifica: P95 < 300ms, P99 < 500ms para
+GET /search con hasta 50,000 vehículos en inventario.
 
 ✅ PERF-02 — Índices documentados
-   Schema incluye índice compuesto (make, model, year, price) para
-   el filtro de búsqueda principal, y índice geoespacial para
-   búsqueda por ubicación.
+Schema incluye índice compuesto (make, model, year, price) para
+el filtro de búsqueda principal, y índice geoespacial para
+búsqueda por ubicación.
 
 ❌ PERF-04 — Paginación no implementada
-   GET /listings no tiene parámetros de limit/offset. Consulta
-   sin límite — hallazgo bloqueante.
+GET /listings no tiene parámetros de limit/offset. Consulta
+sin límite — hallazgo bloqueante.
 ```
 
 ---
@@ -393,21 +393,23 @@ Qué verifica el agente en el diseño:
 
 ```markdown
 ✅ TEST-01 — Flujos críticos cubiertos
-   build-and-test/integration-test-instructions.md documenta:
+build-and-test/integration-test-instructions.md documenta:
 
-   Flujo 1: Publicación → Visibilidad en búsqueda
-   - Estado inicial: vendedor autenticado, sin listados activos
-   - Pasos: POST /listings → esperar indexación → GET /search?make=Honda
-   - Resultado esperado: vehículo aparece en resultados en < 30s
+Flujo 1: Publicación → Visibilidad en búsqueda
 
-   Flujo 2: Oferta → Notificación al vendedor
-   - Estado inicial: comprador y vendedor con cuentas activas
-   - Pasos: POST /offers → verificar evento en cola → GET /notifications/{sellerId}
-   - Resultado esperado: notificación entregada en < 5s
+- Estado inicial: vendedor autenticado, sin listados activos
+- Pasos: POST /listings → esperar indexación → GET /search?make=Honda
+- Resultado esperado: vehículo aparece en resultados en < 30s
+
+Flujo 2: Oferta → Notificación al vendedor
+
+- Estado inicial: comprador y vendedor con cuentas activas
+- Pasos: POST /offers → verificar evento en cola → GET /notifications/{sellerId}
+- Resultado esperado: notificación entregada en < 5s
 
 ✅ TEST-04 — Sin datos reales de producción
-   Fixtures usan VINs de prueba (1HGBH41JXMN109186 — VIN de ejemplo
-   del estándar ISO), emails @example.com, y teléfonos +52 55 0000 0000.
+Fixtures usan VINs de prueba (1HGBH41JXMN109186 — VIN de ejemplo
+del estándar ISO), emails @example.com, y teléfonos +52 55 0000 0000.
 ```
 
 ---
@@ -421,20 +423,24 @@ Qué verifica el agente en el diseño:
 
 // VDATA-01: Validación de VIN
 function isValidVin(vin: string): boolean {
-  if (vin.length !== 17) return false
-  if (/[IOQ]/i.test(vin)) return false
-  return /^[A-HJ-NPR-Z0-9]{17}$/i.test(vin)
+  if (vin.length !== 17) return false;
+  if (/[IOQ]/i.test(vin)) return false;
+  return /^[A-HJ-NPR-Z0-9]{17}$/i.test(vin);
 }
 
 // VDATA-03: Precio como entero en centavos, con sanity checks
 const listingSchema = z.object({
   priceInCents: z.number().int().min(1_000_000).max(500_000_000), // MXN $10k–$5M
-  currency: z.literal('MXN'),
-})
+  currency: z.literal("MXN"),
+});
 
 // VDATA-02: Año en rango válido y configurable
-const currentYear = new Date().getFullYear()
-const yearSchema = z.number().int().min(1885).max(currentYear + 2)
+const currentYear = new Date().getFullYear();
+const yearSchema = z
+  .number()
+  .int()
+  .min(1885)
+  .max(currentYear + 2);
 ```
 
 ---
