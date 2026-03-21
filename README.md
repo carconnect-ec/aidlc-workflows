@@ -23,6 +23,7 @@ AI-DLC (AI-Driven Development Life Cycle) es una metodología de desarrollo guia
   - [Testing de flujos críticos](#testing-de-flujos-críticos-testingmarketplace-flows)
   - [Calidad de datos de vehículos](#calidad-de-datos-de-vehículos-data-qualityvehicle-data)
   - [Accesibilidad WCAG](#accesibilidad-wcag-accessibilitywcag-baseline)
+  - [Contexto multi-repo](#contexto-multi-repo-multi-repo-context)
 - [Recursos](#recursos)
 
 ---
@@ -236,6 +237,7 @@ Las extensiones aplican como **constraints bloqueantes** en todos los proyectos 
 | `testing/marketplace-flows`         | TEST-01…04     | Features en flujos críticos end-to-end            |
 | `data-quality/vehicle-data`         | VDATA-01…05    | Features que crean o modifican datos de vehículos |
 | `accessibility/wcag-baseline`       | A11Y-01…05     | Features con interfaz de usuario                  |
+| `multi-repo-context`                | MRC-01…06      | Épicas que tocan más de un repositorio            |
 
 ---
 
@@ -476,6 +478,57 @@ function VehicleDetailModal({ onClose }) {
     </dialog>
   )
 }
+```
+
+---
+
+### Contexto multi-repo (`multi-repo-context/`)
+
+**Reglas MRC-01…06** — activa cuando la épica involucra más de un repositorio.
+
+Resuelve el problema de que el agente planifique integraciones sin conocer los contratos reales de los otros servicios. Antes de generar cualquier plan, la extensión obliga al agente a entender qué consume y qué emite cada repo involucrado.
+
+**Cómo se activa**: durante Requirements Analysis, AI-DLC pregunta si la épica toca más de un repo. Si la respuesta es sí, se carga la extensión completa y bloquea el avance a CONSTRUCTION hasta que todos los contratos estén resueltos.
+
+**Resolución por tiers** — el agente lee la mínima cantidad de contexto necesaria:
+
+| Tier | Qué hace |
+| ---- | -------- |
+| 0 | Carga contexto de épicas anteriores y verifica si hubo drift |
+| 1 | Lee `docs/context.md` y `docs/integrations.md` del repo |
+| 2 | Lee todos los archivos en `docs/` si Tier 1 no alcanzó |
+| 3 | Lista el árbol del repo e infiere contratos por nombre de archivo, sin importar el stack |
+| 4 | Lee el archivo de código puntual si la lógica interna afecta el contrato |
+
+El agente avanza al siguiente tier solo si el anterior no fue suficiente para responder: qué consume el repo, qué emite, y qué tecnología usa.
+
+**Estándar `docs/` recomendado**: cada repo debería tener dos archivos mínimos que el equipo mantiene:
+
+```
+docs/
+├── context.md       ← qué hace el servicio, inputs, outputs, tecnología
+└── integrations.md  ← de qué repos depende, qué expone hacia otros
+```
+
+Si los archivos no existen, la extensión los infiere por tiers y al finalizar ofrece generarlos como PR — así el estándar se construye solo con el uso.
+
+**Ejemplo de lo que produce antes de CONSTRUCTION**:
+
+```markdown
+## Integration Contracts
+
+### micro-pagos
+Consumes: SQS pagos-confirmacion-queue — evento LeadConfirmado
+Emits: EventBridge — PagoAprobado | PagoRechazado
+Contract source: Tier 1 — docs/context.md + docs/integrations.md
+
+### micro-leads
+Consumes: REST API interna — GET /leads/{id}
+Emits: EventBridge — LeadConfirmado
+Contract source: Tier 3 — inferido de src/events/lead-confirmed.ts
+
+## Unresolved Questions
+(ninguna)
 ```
 
 ---
