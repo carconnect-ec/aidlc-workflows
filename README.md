@@ -512,6 +512,38 @@ docs/
 
 Si los archivos no existen, la extensión los infiere por tiers y al finalizar ofrece generarlos como PR — así el estándar se construye solo con el uso.
 
+**Prompt sugerido para generar los archivos en un repo existente**:
+
+Corre esto dentro del repo que quieres documentar:
+
+```
+Using AI-DLC, genera los archivos docs/context.md y docs/integrations.md para este repositorio
+```
+
+El agente analiza el codebase, infiere inputs, outputs e integraciones, y produce los dos archivos listos para revisar y commitear. No es parte del flujo de épica — es un comando puntual para bootstrapear el estándar.
+
+**Prerequisito — MCP GitHub**:
+
+Para leer repos externos (Tier 0–2), el agente necesita el servidor MCP de GitHub configurado. Sin él, solo puede leer el repo activo localmente — los repos externos caen directo a Tier 3 usando el árbol local si están clonados, o quedan como no resolubles si no lo están.
+
+Configuración en Claude Code — agrega esto a `~/.claude/settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "<tu token>"
+      }
+    }
+  }
+}
+```
+
+El token necesita permisos `repo` (lectura) sobre los repos de la organización. Con esto, el agente puede leer `docs/context.md` de `micro-pagos` aunque estés trabajando en `frontend-dealership`.
+
 **Ejemplo de lo que produce antes de CONSTRUCTION**:
 
 ```markdown
