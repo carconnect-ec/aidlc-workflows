@@ -526,23 +526,21 @@ El agente analiza el codebase, infiere inputs, outputs e integraciones, y produc
 
 Para leer repos externos (Tier 0–2), el agente necesita el servidor MCP de GitHub configurado. Sin él, solo puede leer el repo activo localmente — los repos externos caen directo a Tier 3 usando el árbol local si están clonados, o quedan como no resolubles si no lo están.
 
-Configuración en Claude Code — agrega esto a `~/.claude/settings.json`:
+Instalación en Claude Code — corre este comando una vez (fuera del CLI, en tu terminal):
 
-```json
-{
-  "mcpServers": {
-    "github": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "<tu token>"
-      }
-    }
-  }
-}
+```bash
+claude mcp add-json github '{"type":"http","url":"https://api.githubcopilot.com/mcp","headers":{"Authorization":"Bearer TU_GITHUB_PAT"}}' --scope user
 ```
 
-El token necesita permisos `repo` (lectura) sobre los repos de la organización. Con esto, el agente puede leer `docs/context.md` de `micro-pagos` aunque estés trabajando en `frontend-dealership`.
+`--scope user` lo deja disponible en todos tus proyectos. El token necesita permisos `repo` (lectura) — generalo en [github.com/settings/personal-access-tokens/new](https://github.com/settings/personal-access-tokens/new).
+
+Verificá que quedó instalado:
+
+```bash
+claude mcp list
+```
+
+Con esto, el agente puede leer `docs/context.md` de `micro-pagos` aunque estés trabajando en `frontend-dealership`.
 
 **Ejemplo de lo que produce antes de CONSTRUCTION**:
 
