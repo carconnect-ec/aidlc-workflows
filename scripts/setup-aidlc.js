@@ -2,6 +2,7 @@
 
 'use strict';
 
+const crypto   = require('crypto');
 const fs       = require('fs');
 const path     = require('path');
 const readline = require('readline');
@@ -13,11 +14,6 @@ const SOURCE_RULES   = path.join(PKG_ROOT, 'aidlc-rules', 'aws-aidlc-rules');
 const SOURCE_DETAILS = path.join(PKG_ROOT, 'aidlc-rules', 'aws-aidlc-rule-details');
 
 // ── Utilidades ────────────────────────────────────────────────────────────────
-
-function copyDir(src, dest) {
-  fs.mkdirSync(dest, { recursive: true });
-  fs.cpSync(src, dest, { recursive: true, force: true });
-}
 
 function removeDir(dir) {
   if (fs.existsSync(dir)) {
@@ -131,6 +127,96 @@ function cleanClaudeMd() {
   }
 }
 
+// ── Manifest ──────────────────────────────────────────────────────────────────
+// El manifest registra el hash SHA-256 de cada archivo copiado desde el paquete.
+// Al re-ejecutar el setup, si el archivo en el proyecto tiene un hash diferente
+// al del manifest, el usuario lo modificó — no se sobreescribe.
+// Archivos agregados por el proyecto (sin entrada en el manifest) tampoco se tocan.
+
+const MANIFEST_PATH = path.join(PROJECT_ROOT, '.aidlc-manifest.json');
+
+function hashFile(filePath) {
+  return crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex');
+}
+
+function loadManifest() {
+  if (!fs.existsSync(MANIFEST_PATH)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+function saveManifest(mode, fileMaps) {
+  const files = Object.assign({}, ...fileMaps);
+  const manifest = {
+    version: 1,
+    mode,
+    date: new Date().toISOString().slice(0, 10),
+    files,
+  };
+  fs.writeFileSync(MANIFEST_PATH, JSON.stringify(manifest, null, 2) + '\n');
+}
+
+// Copia srcDir -> destDir de forma inteligente:
+//   - Archivos nuevos (no existen en dest): se copian siempre.
+//   - Archivos sin cambios locales (hash en dest == hash en manifest): se actualizan.
+//   - Archivos modificados por el proyecto (hash difiere del manifest): se omiten con aviso.
+//   - Archivos propios del proyecto en dest (sin entrada en manifest): nunca se tocan.
+//
+// destPrefix: ruta de destDir relativa a PROJECT_ROOT (se usa como clave en el manifest).
+// manifestFiles: manifest.files del setup anterior, o null para primera instalación.
+//
+// Retorna { relPath: hash } de todos los archivos resultantes en dest (para el nuevo manifest).
+function smartCopyDir(srcDir, destDir, manifestFiles, destPrefix) {
+  fs.mkdirSync(destDir, { recursive: true });
+
+  const fileMap = {};
+  const skipped = [];
+
+  function walk(src, dest, prefix) {
+    for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+      const srcPath  = path.join(src, entry.name);
+      const destPath = path.join(dest, entry.name);
+      const relPath  = path.join(prefix, entry.name);
+
+      if (entry.isDirectory()) {
+        fs.mkdirSync(destPath, { recursive: true });
+        walk(srcPath, destPath, relPath);
+        continue;
+      }
+
+      const srcHash = hashFile(srcPath);
+
+      if (manifestFiles && fs.existsSync(destPath)) {
+        const manifestHash = manifestFiles[relPath];
+        if (manifestHash !== undefined) {
+          const destHash = hashFile(destPath);
+          if (destHash !== manifestHash) {
+            // El proyecto modificó este archivo — respetamos sus cambios
+            skipped.push(relPath);
+            fileMap[relPath] = destHash;
+            continue;
+          }
+        }
+      }
+
+      fs.copyFileSync(srcPath, destPath);
+      fileMap[relPath] = srcHash;
+    }
+  }
+
+  walk(srcDir, destDir, destPrefix);
+
+  if (skipped.length > 0) {
+    log(`Omitidos por cambios locales (${skipped.length}):`);
+    skipped.forEach(f => log(`  -> ${f}`));
+  }
+
+  return fileMap;
+}
+
 // ── Detección del modo anterior ───────────────────────────────────────────────
 
 function detectPreviousMode() {
@@ -145,7 +231,7 @@ function detectPreviousMode() {
 
 // ── Modos de setup ────────────────────────────────────────────────────────────
 
-function setupClaudeCode() {
+function setupClaudeCode(manifestFiles) {
   // Limpia todo lo de Kiro si venía de modo B o C
   removeDir(path.join(PROJECT_ROOT, '.kiro', 'steering', 'aws-aidlc-rules'));
   removeDir(path.join(PROJECT_ROOT, '.kiro', 'aws-aidlc-rule-details'));
@@ -153,40 +239,44 @@ function setupClaudeCode() {
   removeIfEmpty(path.join(PROJECT_ROOT, '.kiro'));
 
   log('Copiando rule details...');
-  copyDir(SOURCE_DETAILS, path.join(PROJECT_ROOT, '.aidlc-rule-details'));
+  const detailsMap = smartCopyDir(SOURCE_DETAILS, path.join(PROJECT_ROOT, '.aidlc-rule-details'), manifestFiles, '.aidlc-rule-details');
 
   log('Copiando core-workflow...');
-  copyDir(SOURCE_RULES, path.join(PROJECT_ROOT, '.aidlc-rules'));
+  const rulesMap = smartCopyDir(SOURCE_RULES, path.join(PROJECT_ROOT, '.aidlc-rules'), manifestFiles, '.aidlc-rules');
 
   updateClaudeMd('@.aidlc-rules/core-workflow.md');
+  saveManifest('A', [detailsMap, rulesMap]);
 }
 
-function setupKiro() {
+function setupKiro(manifestFiles) {
   // Limpia lo de Claude Code si venía de modo A o C
   removeDir(path.join(PROJECT_ROOT, '.aidlc-rule-details'));
   removeDir(path.join(PROJECT_ROOT, '.aidlc-rules'));
   cleanClaudeMd();
 
   log('Copiando steering rules...');
-  copyDir(SOURCE_RULES, path.join(PROJECT_ROOT, '.kiro', 'steering', 'aws-aidlc-rules'));
+  const rulesMap = smartCopyDir(SOURCE_RULES, path.join(PROJECT_ROOT, '.kiro', 'steering', 'aws-aidlc-rules'), manifestFiles, '.kiro/steering/aws-aidlc-rules');
 
   log('Copiando rule details...');
-  copyDir(SOURCE_DETAILS, path.join(PROJECT_ROOT, '.kiro', 'aws-aidlc-rule-details'));
+  const detailsMap = smartCopyDir(SOURCE_DETAILS, path.join(PROJECT_ROOT, '.kiro', 'aws-aidlc-rule-details'), manifestFiles, '.kiro/aws-aidlc-rule-details');
+
+  saveManifest('B', [rulesMap, detailsMap]);
 }
 
-function setupBoth() {
+function setupBoth(manifestFiles) {
   // Limpia carpetas de modo A que ya no se necesitan
   removeDir(path.join(PROJECT_ROOT, '.aidlc-rule-details'));
   removeDir(path.join(PROJECT_ROOT, '.aidlc-rules'));
 
   log('Copiando steering rules...');
-  copyDir(SOURCE_RULES, path.join(PROJECT_ROOT, '.kiro', 'steering', 'aws-aidlc-rules'));
+  const rulesMap = smartCopyDir(SOURCE_RULES, path.join(PROJECT_ROOT, '.kiro', 'steering', 'aws-aidlc-rules'), manifestFiles, '.kiro/steering/aws-aidlc-rules');
 
   log('Copiando rule details...');
-  copyDir(SOURCE_DETAILS, path.join(PROJECT_ROOT, '.kiro', 'aws-aidlc-rule-details'));
+  const detailsMap = smartCopyDir(SOURCE_DETAILS, path.join(PROJECT_ROOT, '.kiro', 'aws-aidlc-rule-details'), manifestFiles, '.kiro/aws-aidlc-rule-details');
 
   // CLAUDE.md importa desde el steering de Kiro — una sola copia, sin duplicación
   updateClaudeMd('@.kiro/steering/aws-aidlc-rules/core-workflow.md');
+  saveManifest('C', [rulesMap, detailsMap]);
 }
 
 function uninstall() {
@@ -198,6 +288,10 @@ function uninstall() {
   removeIfEmpty(path.join(PROJECT_ROOT, '.kiro'));
   cleanClaudeMd();
   removeFromGitignore();
+  if (fs.existsSync(MANIFEST_PATH)) {
+    fs.unlinkSync(MANIFEST_PATH);
+    log('Eliminado: .aidlc-manifest.json');
+  }
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -205,6 +299,7 @@ function uninstall() {
 validateSources();
 
 const previousMode = detectPreviousMode();
+const manifest     = loadManifest();
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
 console.log('\nConfigurando AI-DLC para CarConnect...\n');
@@ -244,13 +339,18 @@ rl.question('Respuesta: ', (answer) => {
     process.exit(1);
   }
 
+  // Usa el manifest existente solo si el modo no cambió.
+  // Si cambió de modo, los directorios anteriores se eliminan de todas formas,
+  // así que tratamos los nuevos destinos como instalación limpia.
+  const manifestFiles = (manifest && manifest.mode === choice) ? manifest.files : null;
+
   console.log(`Configurando para ${modeMap[choice].label}...\n`);
-  modeMap[choice].fn();
+  modeMap[choice].fn(manifestFiles);
 
   const commitFiles = {
-    A: 'CLAUDE.md, .aidlc-rules/, .aidlc-rule-details/',
-    B: '.kiro/steering/, .kiro/aws-aidlc-rule-details/',
-    C: 'CLAUDE.md, .kiro/steering/, .kiro/aws-aidlc-rule-details/',
+    A: 'CLAUDE.md, .aidlc-rules/, .aidlc-rule-details/, .aidlc-manifest.json',
+    B: '.kiro/steering/, .kiro/aws-aidlc-rule-details/, .aidlc-manifest.json',
+    C: 'CLAUDE.md, .kiro/steering/, .kiro/aws-aidlc-rule-details/, .aidlc-manifest.json',
   };
 
   console.log('\nAI-DLC listo.\n');
