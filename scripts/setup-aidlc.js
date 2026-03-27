@@ -220,6 +220,12 @@ function smartCopyDir(srcDir, destDir, manifestFiles, destPrefix) {
 // ── Detección del modo anterior ───────────────────────────────────────────────
 
 function detectPreviousMode() {
+  // El manifest es la fuente autoritativa: setupBoth (modo C) no crea .aidlc-rule-details/
+  // (usa .kiro/aws-aidlc-rule-details/), por lo que la detección por directorio no distingue
+  // entre B y C. Leemos el manifest primero si existe.
+  const saved = loadManifest();
+  if (saved && saved.mode) return saved.mode;
+
   const hasAidlcRuleDetails = fs.existsSync(path.join(PROJECT_ROOT, '.aidlc-rule-details'));
   const hasKiroSteering     = fs.existsSync(path.join(PROJECT_ROOT, '.kiro', 'steering', 'aws-aidlc-rules'));
 
@@ -339,10 +345,12 @@ rl.question('Respuesta: ', (answer) => {
     process.exit(1);
   }
 
-  // Usa el manifest existente solo si el modo no cambió.
-  // Si cambió de modo, los directorios anteriores se eliminan de todas formas,
-  // así que tratamos los nuevos destinos como instalación limpia.
-  const manifestFiles = (manifest && manifest.mode === choice) ? manifest.files : null;
+  // Siempre pasamos manifest.files (si existe) a smartCopyDir.
+  // La protección funciona por path: si el destino comparte paths con el manifest
+  // (mismo modo, o B<->C que usan los mismos dirs de kiro), los archivos modificados
+  // localmente se respetan. Si los paths no coinciden (ej. A->B), las entradas del
+  // manifest no hacen match y se trata como instalación limpia — sin riesgo.
+  const manifestFiles = manifest ? manifest.files : null;
 
   console.log(`Configurando para ${modeMap[choice].label}...\n`);
   modeMap[choice].fn(manifestFiles);
