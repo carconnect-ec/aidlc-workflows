@@ -53,27 +53,33 @@ setup-aidlc
 
 ### Qué hace el script
 
-El script te pregunta qué herramienta vas a usar:
+El script te pregunta con qué herramienta vas a trabajar en el proyecto:
 
 ```
-¿Qué herramienta vas a usar en este proyecto?
+¿Con qué herramienta de IA trabajás en este proyecto?
 
-  A) Claude Code
-  B) Kiro
-  C) Ambas
-  D) Desinstalar AI-DLC de este proyecto
+  A) Claude Code          — agente de Anthropic en la terminal / IDE
+                            instala reglas en .aidlc-rules/ y las importa en CLAUDE.md
+
+  B) Kiro                 — IDE de Amazon con soporte nativo de steering
+                            instala reglas en .kiro/steering/aws-aidlc-rules/
+
+  C) Claude Code + Kiro   — ambas herramientas en el mismo proyecto
+                            usa una sola copia en .kiro/steering/ (CLAUDE.md la importa)
+
+  D) Desinstalar          — elimina todos los archivos de AI-DLC del proyecto
 ```
 
 Según la opción, copia las reglas en la ubicación que cada herramienta espera:
 
-| Opción          | Archivos generados                                                 | Qué commitear |
-| --------------- | ------------------------------------------------------------------ | ------------- |
-| A — Claude Code | `CLAUDE.md`, `.aidlc-rules/`, `.aidlc-rule-details/`               | Todo          |
-| B — Kiro        | `.kiro/steering/aws-aidlc-rules/`, `.kiro/aws-aidlc-rule-details/` | Todo          |
-| C — Ambas       | Kiro + `CLAUDE.md` apuntando al steering de Kiro                   | Todo          |
-| D — Desinstalar | Elimina todo lo anterior                                           | —             |
+| Opción              | Archivos instalados                                                                        | Qué commitear |
+| ------------------- | ------------------------------------------------------------------------------------------ | ------------- |
+| A — Claude Code     | `.aidlc-rules/`, `.aidlc-rule-details/`, `CLAUDE.md`, `.aidlc-manifest.json`               | Todo          |
+| B — Kiro            | `.kiro/steering/aws-aidlc-rules/`, `.kiro/aws-aidlc-rule-details/`, `.aidlc-manifest.json` | Todo          |
+| C — Claude Code + Kiro | `.kiro/steering/aws-aidlc-rules/`, `.kiro/aws-aidlc-rule-details/`, `CLAUDE.md`, `.aidlc-manifest.json` | Todo |
+| D — Desinstalar     | Elimina todo lo anterior                                                                   | —             |
 
-Si el proyecto ya tenía AI-DLC instalado, el script detecta el modo anterior y limpia lo que ya no aplica.
+Si el proyecto ya tenía AI-DLC instalado, el script detecta el modo anterior y limpia lo que ya no aplica. Al re-ejecutar, los archivos que el proyecto haya modificado (extensiones propias, reglas ajustadas) no se sobreescriben — solo se actualizan los archivos que no tuvieron cambios locales.
 
 ---
 

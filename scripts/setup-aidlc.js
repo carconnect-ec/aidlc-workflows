@@ -315,11 +315,17 @@ if (previousMode) {
   console.log(`  Setup anterior detectado: ${labels[previousMode]}\n`);
 }
 
-console.log('¿Qué herramienta vas a usar en este proyecto?\n');
-console.log('  A) Claude Code');
-console.log('  B) Kiro');
-console.log('  C) Ambas');
-console.log('  D) Desinstalar AI-DLC de este proyecto\n');
+console.log('¿Con qué herramienta de IA trabajás en este proyecto?\n');
+console.log('  A) Claude Code          — agente de Anthropic en la terminal / IDE');
+console.log('                            instala reglas en .aidlc-rules/ y las importa en CLAUDE.md');
+console.log('');
+console.log('  B) Kiro                 — IDE de Amazon con soporte nativo de steering');
+console.log('                            instala reglas en .kiro/steering/aws-aidlc-rules/');
+console.log('');
+console.log('  C) Claude Code + Kiro   — ambas herramientas en el mismo proyecto');
+console.log('                            usa una sola copia en .kiro/steering/ (CLAUDE.md la importa)');
+console.log('');
+console.log('  D) Desinstalar          — elimina todos los archivos de AI-DLC del proyecto\n');
 
 rl.question('Respuesta: ', (answer) => {
   rl.close();
