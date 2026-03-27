@@ -1,0 +1,138 @@
+# Sync Upstream Rules
+#
+# Detecta cuando awslabs/aidlc-workflows tiene cambios en aidlc-rules/
+# y abre un PR automáticamente para revisión.
+#
+# Se ejecuta cada lunes a las 9am UTC o manualmente.
+# Solo sincroniza aidlc-rules/ para evitar conflictos con nuestras
+# personalizaciones (setup-aidlc.js, package.json, etc.).
+
+name: Sync upstream rules
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    name: Check and sync upstream
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Add upstream remote
+        run: git remote add upstream https://github.com/awslabs/aidlc-workflows.git
+
+      - name: Fetch upstream
+        run: git fetch upstream main
+
+      - name: Check for rule changes
+        id: check
+        run: |
+          CHANGES=$(git diff --name-only HEAD upstream/main -- aidlc-rules/)
+          if [ -z "$CHANGES" ]; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "No hay cambios en aidlc-rules/ desde upstream."
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            echo "Cambios detectados:"
+            echo "$CHANGES"
+            # Guarda la lista para el cuerpo del PR
+            echo "changed_files<<EOF" >> "$GITHUB_OUTPUT"
+            echo "$CHANGES" >> "$GITHUB_OUTPUT"
+            echo "EOF" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check for existing sync PR
+        id: existing_pr
+        if: steps.check.outputs.has_changes == 'true'
+        run: |
+          OPEN=$(gh pr list --base main --head "sync/upstream-*" --state open --json number --jq 'length')
+          echo "open_count=$OPEN" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create sync branch
+        if: >
+          steps.check.outputs.has_changes == 'true' &&
+          steps.existing_pr.outputs.open_count == '0'
+        id: branch
+        run: |
+          DATE=$(date +%Y-%m-%d)
+          BRANCH="sync/upstream-$DATE"
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          # Solo copiamos aidlc-rules/ desde upstream, sin tocar nuestras customizaciones
+          git checkout upstream/main -- aidlc-rules/
+          git commit -m "chore: sync aidlc-rules from upstream ($DATE)"
+          git push origin "$BRANCH"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+          echo "date=$DATE" >> "$GITHUB_OUTPUT"
+
+      - name: Build upstream commit log
+        if: steps.branch.conclusion == 'success'
+        id: commits
+        run: |
+          LOG=$(git log HEAD..upstream/main --oneline -- aidlc-rules/ | head -20)
+          echo "log<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$LOG" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Create PR
+        if: steps.branch.conclusion == 'success'
+        run: |
+          gh pr create \
+            --title "chore: sync aidlc-rules desde upstream (${{ steps.branch.outputs.date }})" \
+            --base main \
+            --head "${{ steps.branch.outputs.branch }}" \
+            --body "$(cat <<'BODY'
+          ## Sync automático desde upstream
+
+          Este PR fue generado automáticamente por el workflow `sync-upstream.yml`.
+          Contiene cambios en `aidlc-rules/` detectados en [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows).
+
+          ## Archivos modificados
+
+          ```
+          ${{ steps.check.outputs.changed_files }}
+          ```
+
+          ## Commits de upstream incluidos
+
+          ```
+          ${{ steps.commits.outputs.log }}
+          ```
+
+          ## Checklist de revisión
+
+          - [ ] Revisar los cambios en `aidlc-rules/` — verificar que son compatibles con nuestro setup
+          - [ ] Verificar que `core-workflow.md` no tiene breaking changes
+          - [ ] Si hay reglas nuevas o eliminadas, actualizar `setup-aidlc.js` si es necesario
+          - [ ] Mergear y crear un release si corresponde
+
+          > **Nota:** Solo se sincroniza `aidlc-rules/`. Nuestras customizaciones (`scripts/`, `package.json`, etc.) no se modifican.
+          BODY
+          )"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Skip — already has open sync PR
+        if: >
+          steps.check.outputs.has_changes == 'true' &&
+          steps.existing_pr.outputs.open_count != '0'
+        run: echo "Ya existe un PR de sync abierto. Skipping."
+
+      - name: Skip — no changes
+        if: steps.check.outputs.has_changes == 'false'
+        run: echo "aidlc-rules/ está al día con upstream."
