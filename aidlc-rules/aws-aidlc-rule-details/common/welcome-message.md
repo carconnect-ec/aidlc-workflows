@@ -1,109 +1,109 @@
-# AI-DLC Welcome Message
+# Mensaje de Bienvenida AI-DLC
 
-**Purpose**: This file contains the user-facing welcome message that should be displayed ONCE at the start of any AI-DLC workflow.
+**Propósito**: Este archivo contiene el mensaje de bienvenida dirigido al usuario que debe mostrarse UNA VEZ al inicio de cualquier flujo AI-DLC.
 
 ---
 
-# 👋 Welcome to AI-DLC (AI-Driven Development Life Cycle)! 👋
+# 👋 ¡Bienvenido a AI-DLC (AI-Driven Development Life Cycle)! 👋
 
-I'll guide you through an adaptive software development workflow that intelligently tailors itself to your specific needs.
+Te guiaré a través de un flujo de desarrollo de software adaptativo que se ajusta inteligentemente a tus necesidades específicas.
 
-## What is AI-DLC?
+## ¿Qué es AI-DLC?
 
-AI-DLC is a structured yet flexible software development process that adapts to your project's needs. Think of it as having an experienced software architect who:
+AI-DLC es un proceso de desarrollo de software estructurado y flexible que se adapta a las necesidades de tu proyecto. Piensa en él como tener un arquitecto de software experimentado que:
 
-- **Analyzes your requirements** and asks clarifying questions when needed
-- **Plans the optimal approach** based on complexity and risk
-- **Skips unnecessary steps** for simple changes while providing comprehensive coverage for complex projects
-- **Documents everything** so you have a complete record of decisions and rationale
-- **Guides you through each phase** with clear checkpoints and approval gates
+- **Analiza tus requisitos** y hace preguntas de aclaración cuando es necesario
+- **Planifica el enfoque óptimo** según la complejidad y el riesgo
+- **Omite pasos innecesarios** para cambios simples y brinda cobertura completa para proyectos complejos
+- **Documenta todo** para que tengas un registro completo de decisiones y razonamiento
+- **Te guía en cada fase** con puntos de control y puertas de aprobación claras
 
-## The Three-Phase Lifecycle
+## El Ciclo de Vida en Tres Fases
 
 ```
-                         User Request
+                         Solicitud del Usuario
                               |
                               v
         ╔═══════════════════════════════════════╗
-        ║     INCEPTION PHASE                   ║
-        ║     Planning & Application Design     ║
+        ║     FASE DE INCEPTION                 ║
+        ║     Planificación y Diseño            ║
         ╠═══════════════════════════════════════╣
-        ║ • Workspace Detection (ALWAYS)        ║
-        ║ • Reverse Engineering (COND)          ║
-        ║ • Requirements Analysis (ALWAYS)      ║
-        ║ • User Stories (CONDITIONAL)          ║
-        ║ • Workflow Planning (ALWAYS)          ║
-        ║ • Application Design (CONDITIONAL)    ║
-        ║ • Units Generation (CONDITIONAL)      ║
+        ║ • Detección de Workspace (SIEMPRE)    ║
+        ║ • Ingeniería Inversa (COND)           ║
+        ║ • Análisis de Requisitos (SIEMPRE)    ║
+        ║ • Historias de Usuario (CONDICIONAL)  ║
+        ║ • Planificación de Flujo (SIEMPRE)    ║
+        ║ • Diseño de Aplicación (CONDICIONAL)  ║
+        ║ • Generación de Unidades (CONDICIONAL)║
         ╚═══════════════════════════════════════╝
                               |
                               v
         ╔═══════════════════════════════════════╗
-        ║     CONSTRUCTION PHASE                ║
-        ║     Design, Implementation & Test     ║
+        ║     FASE DE CONSTRUCTION              ║
+        ║     Diseño, Implementación y Testing  ║
         ╠═══════════════════════════════════════╣
-        ║ • Per-Unit Loop (for each unit):      ║
-        ║   - Functional Design (COND)          ║
-        ║   - NFR Requirements Assess (COND)    ║
-        ║   - NFR Design (COND)                 ║
-        ║   - Infrastructure Design (COND)      ║
-        ║   - Code Generation (ALWAYS)          ║
-        ║ • Build and Test (ALWAYS)             ║
+        ║ • Bucle por Unidad (por cada unidad): ║
+        ║   - Diseño Funcional (COND)           ║
+        ║   - Evaluación NFR (COND)             ║
+        ║   - Diseño NFR (COND)                 ║
+        ║   - Diseño de Infraestructura (COND)  ║
+        ║   - Generación de Código (SIEMPRE)    ║
+        ║ • Build y Testing (SIEMPRE)           ║
         ╚═══════════════════════════════════════╝
                               |
                               v
         ╔═══════════════════════════════════════╗
-        ║     OPERATIONS PHASE                  ║
-        ║     Placeholder for Future            ║
+        ║     FASE DE OPERATIONS                ║
+        ║     Placeholder para el Futuro        ║
         ╠═══════════════════════════════════════╣
         ║ • Operations (PLACEHOLDER)            ║
         ╚═══════════════════════════════════════╝
                               |
                               v
-                          Complete
+                          Completado
 ```
 
-### Phase Breakdown:
+### Desglose de Fases:
 
-**INCEPTION PHASE** - *Planning & Application Design*
-- **Purpose**: Determines WHAT to build and WHY
-- **Activities**: Understanding requirements, analyzing existing code (if any), planning the approach
-- **Output**: Clear requirements, execution plan, decisions on the number of units of work for parallel development
-- **Your Role**: Answer questions, review plans, approve direction
+**FASE DE INCEPTION** - *Planificación y Diseño de Aplicación*
+- **Propósito**: Determina QUÉ construir y POR QUÉ
+- **Actividades**: Comprender requisitos, analizar código existente (si aplica), planificar el enfoque
+- **Resultado**: Requisitos claros, plan de ejecución, decisiones sobre el número de unidades de trabajo para desarrollo paralelo
+- **Tu Rol**: Responder preguntas, revisar planes, aprobar la dirección
 
-**CONSTRUCTION PHASE** - *Detailed Design, Implementation & Test*
-- **Purpose**: Determines HOW to build it
-- **Activities**: Detailed design (when needed), code generation, comprehensive testing
-- **Output**: Working code, tests, build instructions
-- **Your Role**: Review designs, approve implementation plans, validate results
+**FASE DE CONSTRUCTION** - *Diseño Detallado, Implementación y Testing*
+- **Propósito**: Determina CÓMO construirlo
+- **Actividades**: Diseño detallado (cuando se necesite), generación de código, testing comprensivo
+- **Resultado**: Código funcionando, tests, instrucciones de build
+- **Tu Rol**: Revisar diseños, aprobar planes de implementación, validar resultados
 
-**OPERATIONS PHASE** - *Deployment & Monitoring (Future)*
-- **Purpose**: How to DEPLOY and RUN it
-- **Status**: Placeholder for future deployment and monitoring workflows
-- **Current State**: Build and test activities handled in CONSTRUCTION phase
+**FASE DE OPERATIONS** - *Despliegue y Monitoreo (Futuro)*
+- **Propósito**: Cómo DESPLEGAR y OPERAR el sistema
+- **Estado**: Placeholder para futuros flujos de despliegue y monitoreo
+- **Estado Actual**: Las actividades de build y testing se manejan en la fase de CONSTRUCTION
 
-## Key Principles:
+## Principios Clave:
 
-- ⚡ **Fully Adaptive**: Each stage independently evaluated based on your needs
-- 🎯 **Efficient**: Simple changes execute only essential stages
-- 📋 **Comprehensive**: Complex changes get full treatment with all safeguards
-- 🔍 **Transparent**: You see and approve the execution plan before work begins
-- 📝 **Documented**: Complete audit trail of all decisions and changes
-- 🎛️ **User Control**: You can request stages be included or excluded
+- ⚡ **Totalmente Adaptativo**: Cada etapa se evalúa de forma independiente según tus necesidades
+- 🎯 **Eficiente**: Los cambios simples ejecutan solo las etapas esenciales
+- 📋 **Comprensivo**: Los cambios complejos reciben tratamiento completo con todas las salvaguardas
+- 🔍 **Transparente**: Ves y apruebas el plan de ejecución antes de que comience el trabajo
+- 📝 **Documentado**: Registro de auditoría completo de todas las decisiones y cambios
+- 🎛️ **Control del Usuario**: Puedes solicitar que se incluyan o excluyan etapas
 
-## What Happens Next:
+## Qué Sucede a Continuación:
 
-1. **I'll analyze your workspace** to understand if this is a new or existing project
-2. **I'll gather requirements** and ask clarifying questions if needed
-3. **I'll create an execution plan** showing which stages I propose to run and why
-4. **You'll review and approve** the plan (or request changes)
-5. **We'll execute the plan** with checkpoints at each major stage
-6. **You'll get working code** with complete documentation and tests
+1. **Analizaré tu workspace** para entender si es un proyecto nuevo o existente
+2. **Recopilaré requisitos** y haré preguntas de aclaración si es necesario
+3. **Crearé un plan de ejecución** mostrando qué etapas propongo ejecutar y por qué
+4. **Tú revisarás y aprobarás** el plan (o solicitarás cambios)
+5. **Ejecutaremos el plan** con puntos de control en cada etapa principal
+6. **Obtendrás código funcionando** con documentación completa y tests
 
-The AI-DLC process adapts to:
-- 📋 Your intent clarity and complexity
-- 🔍 Existing codebase state
-- 🎯 Scope and impact of changes
-- ⚡ Risk and quality requirements
+El proceso AI-DLC se adapta a:
+- 📋 La claridad y complejidad de tu intención
+- 🔍 El estado del codebase existente
+- 🎯 El alcance e impacto de los cambios
+- ⚡ Los requisitos de riesgo y calidad
 
-Let's begin!
+¡Comencemos!

@@ -20,21 +20,6 @@ Todas las reglas de este documento son **bloqueantes** por defecto.
 
 ---
 
-## Applicability Question
-
-```markdown
-## Pregunta: Performance de Búsqueda e Inventario CarConnect
-¿Esta feature involucra búsqueda de vehículos, listado de inventario, filtros, o visualización de fichas de vehículos?
-
-A) Sí — aplicar todas las reglas PERF como constraints bloqueantes
-B) No — esta feature no involucra búsqueda ni listado de inventario
-X) Otro (describir después del tag [Answer]: abajo)
-
-[Answer]:
-```
-
----
-
 ## Rule PERF-01: Latencia de búsqueda documentada como NFR
 
 **Regla**: Todo feature de búsqueda DEBE tener un NFR de latencia documentado explícitamente en el diseño, con valores de P95 y P99.

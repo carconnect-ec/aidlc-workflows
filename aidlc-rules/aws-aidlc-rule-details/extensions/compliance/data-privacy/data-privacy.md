@@ -20,21 +20,6 @@ Todas las reglas de este documento son **bloqueantes** por defecto.
 
 ---
 
-## Applicability Question
-
-```markdown
-## Pregunta: Privacidad de Datos CarConnect
-¿Esta feature recopila, procesa o almacena datos personales de usuarios (nombre, email, teléfono, documentos de identidad, ubicación, historial de actividad)?
-
-A) Sí — aplicar todas las reglas PRIVACY como constraints bloqueantes
-B) No — esta feature no toca datos personales de usuarios
-X) Otro (describir después del tag [Answer]: abajo)
-
-[Answer]:
-```
-
----
-
 ## Rule PRIVACY-01: Catálogo de PII
 
 **Regla**: Todo diseño que involucre datos personales DEBE incluir un inventario explícito de qué datos se recopilan, con qué propósito, y con qué base legal.

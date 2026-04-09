@@ -22,23 +22,6 @@ Todas las reglas de este documento son **bloqueantes** por defecto.
 
 ---
 
-## Applicability Question
-
-La siguiente pregunta se incluye automáticamente en las preguntas de aclaración de Requirements Analysis cuando esta extensión se carga:
-
-```markdown
-## Pregunta: Estándar de Idioma CarConnect
-¿Deben aplicarse las reglas de idioma de CarConnect en este proyecto?
-
-A) Sí — aplicar todas las reglas LANG como constraints bloqueantes (recomendado para todos los proyectos de CarConnect)
-B) No — omitir las reglas de idioma (adecuado para proyectos externos o de terceros)
-X) Otro (describir después del tag [Answer]: abajo)
-
-[Answer]:
-```
-
----
-
 ## Rule LANG-01: Idioma de comunicación con el usuario
 
 **Regla**: Toda comunicación del modelo con el usuario DEBE estar en español. Esto incluye sin excepción:

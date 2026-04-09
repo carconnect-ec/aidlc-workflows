@@ -20,21 +20,6 @@ Todas las reglas de este documento son **bloqueantes** por defecto.
 
 ---
 
-## Applicability Question
-
-```markdown
-## Pregunta: Confianza de Marketplace CarConnect
-¿Esta feature involucra listados de vehículos, perfiles de vendedores/compradores, búsqueda de inventario o transacciones entre usuarios?
-
-A) Sí — aplicar todas las reglas TRUST como constraints bloqueantes
-B) No — esta feature es interna o de infraestructura sin exposición a usuarios externos
-X) Otro (describir después del tag [Answer]: abajo)
-
-[Answer]:
-```
-
----
-
 ## Rule TRUST-01: Límites de publicación por vendedor
 
 **Regla**: El diseño de cualquier módulo de publicación de vehículos DEBE incluir límites configurables de listados activos por vendedor para prevenir spam y flooding del inventario.

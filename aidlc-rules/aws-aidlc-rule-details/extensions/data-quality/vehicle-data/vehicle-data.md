@@ -20,21 +20,6 @@ Todas las reglas de este documento son **bloqueantes** por defecto.
 
 ---
 
-## Applicability Question
-
-```markdown
-## Pregunta: Calidad de Datos de Vehículos CarConnect
-¿Esta feature crea, modifica o valida datos de vehículos (VIN, año, marca, modelo, precio, kilometraje)?
-
-A) Sí — aplicar todas las reglas VDATA como constraints bloqueantes
-B) No — esta feature no involucra datos de vehículos
-X) Otro (describir después del tag [Answer]: abajo)
-
-[Answer]:
-```
-
----
-
 ## Rule VDATA-01: Validación de formato VIN
 
 **Regla**: Todo campo VIN DEBE ser validado antes de almacenarse, con las reglas formales del estándar ISO 3779.

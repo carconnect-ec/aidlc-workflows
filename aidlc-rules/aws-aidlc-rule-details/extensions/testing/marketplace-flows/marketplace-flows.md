@@ -20,21 +20,6 @@ Todas las reglas de este documento son **bloqueantes** por defecto.
 
 ---
 
-## Applicability Question
-
-```markdown
-## Pregunta: Testing de Flujos de Marketplace CarConnect
-¿Esta feature forma parte de un flujo crítico del marketplace (publicación de vehículo, búsqueda, contacto entre usuarios, oferta, o notificaciones)?
-
-A) Sí — aplicar todas las reglas TEST como constraints bloqueantes
-B) No — esta feature es interna o de soporte sin impacto en flujos de usuario
-X) Otro (describir después del tag [Answer]: abajo)
-
-[Answer]:
-```
-
----
-
 ## Rule TEST-01: Tests de integración para flujos críticos
 
 **Regla**: Los flujos end-to-end críticos del marketplace DEBEN tener tests de integración documentados en las instrucciones de Build and Test.

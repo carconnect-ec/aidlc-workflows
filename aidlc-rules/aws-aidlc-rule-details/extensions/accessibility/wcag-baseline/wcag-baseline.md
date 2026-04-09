@@ -20,21 +20,6 @@ Todas las reglas de este documento son **bloqueantes** por defecto.
 
 ---
 
-## Applicability Question
-
-```markdown
-## Pregunta: Accesibilidad WCAG CarConnect
-¿Esta feature incluye componentes de interfaz de usuario (web o mobile) visibles para usuarios finales?
-
-A) Sí — aplicar todas las reglas A11Y como constraints bloqueantes
-B) No — esta feature es de backend, infraestructura o herramienta interna sin interfaz de usuario
-X) Otro (describir después del tag [Answer]: abajo)
-
-[Answer]:
-```
-
----
-
 ## Rule A11Y-01: Etiquetas ARIA en formularios
 
 **Regla**: Todo formulario generado DEBE tener etiquetas accesibles en todos sus campos de entrada.
