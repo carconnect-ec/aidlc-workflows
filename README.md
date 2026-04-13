@@ -2,129 +2,271 @@
 
 Fork interno de [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) con extensiones y tooling propios de CarConnect.
 
-AI-DLC (AI-Driven Development Life Cycle) es una metodología de desarrollo guiada por IA que estructura el trabajo en tres fases: **Inception** (qué construir y por qué), **Construction** (cómo construirlo) y **Operations** (pendiente en upstream).
+<!-- TODO: Replace this Amplify URL with a permanent/stable URL when available -->
+
+AI-DLC is an intelligent software development workflow that adapts to your needs, maintains quality standards, and keeps you in control of the process. For learning more about AI-DLC Methodology, read this [blog](https://aws.amazon.com/blogs/devops/ai-driven-development-life-cycle/) and the [Method Definition Paper](https://prod.d13rzhkk8cj2z0.amplifyapp.com/) referred in it.
+
+## Table of Contents
+
+- [Quick Start](#quick-start)
+- [Platform-Specific Setup](#platform-specific-setup)
+- [Usage](#usage)
+- [Three-Phase Adaptive Workflow](#three-phase-adaptive-workflow)
+- [Key Features](#key-features)
+- [Extensions](#extensions)
+- [Tenets](#tenets)
+- [Prerequisites](#prerequisites)
+- [Troubleshooting](#troubleshooting)
+- [Version Control Recommendations](#version-control-recommendations)
+- [Additional Resources](#additional-resources)
+- [Security](#security)
+- [License](#license)
 
 ---
 
-## Tabla de contenidos
+## Quick Start
 
-- [Instalación en un proyecto](#instalación-en-un-proyecto)
-- [Cómo usar AI-DLC](#cómo-usar-ai-dlc)
-- [Ciclo de vida de aidlc-docs/](#ciclo-de-vida-de-aidlc-docs)
-- [Flujo multi-feature](#flujo-multi-feature)
-- [Proyectos brownfield](#proyectos-brownfield)
-- [Extensiones CarConnect](#extensiones-carconnect)
-  - [Estándar de idioma](#estándar-de-idioma-company-standardslanguage)
-  - [Convenciones de git](#convenciones-de-git-company-standardsgit-conventions)
-  - [Seguridad baseline](#seguridad-baseline-securitybaseline)
-  - [Privacidad de datos](#privacidad-de-datos-compliancedata-privacy)
-  - [Confianza de marketplace](#confianza-de-marketplace-compliancemarketplace-trust)
-  - [Performance de búsqueda](#performance-de-búsqueda-performancesearch-inventory)
-  - [Testing de flujos críticos](#testing-de-flujos-críticos-testingmarketplace-flows)
-  - [Calidad de datos de vehículos](#calidad-de-datos-de-vehículos-data-qualityvehicle-data)
-  - [Accesibilidad WCAG](#accesibilidad-wcag-accessibilitywcag-baseline)
-  - [Contexto multi-repo](#contexto-multi-repo-multi-repo-context)
-- [Recursos](#recursos)
+1. Download the latest release zip from the [Releases page](../../releases/latest) to a folder **outside** your project directory (e.g., `~/Downloads`).
+2. Extract the zip. It contains an `aidlc-rules/` folder with two subdirectories:
+   - `aws-aidlc-rules/` — the core AI-DLC workflow rules
+   - `aws-aidlc-rule-details/` — detailed rules conditionally referenced by the core rules
+3. Follow the setup instructions for your coding agent and platform below.
 
 ---
 
-## Instalación en un proyecto
+## Platform-Specific Setup
 
-Este repo expone el comando `setup-aidlc`. Córrelo desde la raíz del proyecto donde quieres usar AI-DLC.
+- [Kiro](#kiro)
+- [Amazon Q Developer IDE Plugin](#amazon-q-developer-ide-pluginextension)
+- [Cursor IDE](#cursor-ide)
+- [Cline](#cline)
+- [Claude Code](#claude-code)
+- [GitHub Copilot](#github-copilot)
+- [Other Agents](#other-agents)
 
-### Opción recomendada — npx desde GitHub
+---
+
+### Kiro
+
+AI-DLC uses [Kiro Steering Files](https://kiro.dev/docs/cli/steering/) within your project workspace.
+
+The commands below assume you extracted the zip to your `Downloads` folder. If you used a different location, replace `Downloads` with your actual folder path.
+
+On macOS/Linux:
 
 ```bash
-cd mi-proyecto
-npx github:carconnect-ec/aidlc-workflows
+mkdir -p .kiro/steering
+cp -R ~/Downloads/aidlc-rules/aws-aidlc-rules .kiro/steering/
+cp -R ~/Downloads/aidlc-rules/aws-aidlc-rule-details .kiro/
 ```
 
-### Opción local — npm link
+On Windows (PowerShell):
 
-```bash
-# Una vez, en este repo:
-cd ~/carconnect/general/aidlc-workflows
-npm link
-
-# En cualquier proyecto:
-cd mi-proyecto
-setup-aidlc
+```powershell
+New-Item -ItemType Directory -Force -Path ".kiro\steering"
+Copy-Item -Recurse "$env:USERPROFILE\Downloads\aidlc-rules\aws-aidlc-rules" ".kiro\steering\"
+Copy-Item -Recurse "$env:USERPROFILE\Downloads\aidlc-rules\aws-aidlc-rule-details" ".kiro\"
 ```
 
-### Qué hace el script
+On Windows (CMD):
 
-El script te pregunta con qué herramienta vas a trabajar en el proyecto:
-
-```
-¿Con qué herramienta de IA trabajás en este proyecto?
-
-  A) Claude Code          — agente de Anthropic en la terminal / IDE
-                            instala reglas en .aidlc-rules/ y las importa en CLAUDE.md
-
-  B) Kiro                 — IDE de Amazon con soporte nativo de steering
-                            instala reglas en .kiro/steering/aws-aidlc-rules/
-
-  C) Claude Code + Kiro   — ambas herramientas en el mismo proyecto
-                            usa una sola copia en .kiro/steering/ (CLAUDE.md la importa)
-
-  D) Desinstalar          — elimina todos los archivos de AI-DLC del proyecto
+```cmd
+mkdir .kiro\steering
+xcopy %USERPROFILE%\Downloads\aidlc-rules\aws-aidlc-rules .kiro\steering\aws-aidlc-rules\ /E /I
+xcopy %USERPROFILE%\Downloads\aidlc-rules\aws-aidlc-rule-details .kiro\aws-aidlc-rule-details\ /E /I
 ```
 
-Según la opción, copia las reglas en la ubicación que cada herramienta espera:
+Your project should look like:
 
-| Opción              | Archivos instalados                                                                        | Qué commitear |
-| ------------------- | ------------------------------------------------------------------------------------------ | ------------- |
-| A — Claude Code     | `.aidlc-rules/`, `.aidlc-rule-details/`, `CLAUDE.md`, `.aidlc-manifest.json`               | Todo          |
-| B — Kiro            | `.kiro/steering/aws-aidlc-rules/`, `.kiro/aws-aidlc-rule-details/`, `.aidlc-manifest.json` | Todo          |
-| C — Claude Code + Kiro | `.kiro/steering/aws-aidlc-rules/`, `.kiro/aws-aidlc-rule-details/`, `CLAUDE.md`, `.aidlc-manifest.json` | Todo |
-| D — Desinstalar     | Elimina todo lo anterior                                                                   | —             |
+```text
+<project-root>/
+    ├── .kiro/
+    │     ├── steering/
+    │     │      ├── aws-aidlc-rules/
+    │     ├── aws-aidlc-rule-details/
+```
 
-Si el proyecto ya tenía AI-DLC instalado, el script detecta el modo anterior y limpia lo que ya no aplica. Al re-ejecutar, los archivos que el proyecto haya modificado (extensiones propias, reglas ajustadas) no se sobreescriben — solo se actualizan los archivos que no tuvieron cambios locales.
+To verify the rules are loaded:
+
+#### Verify in Kiro IDE
+
+Open the steering files panel and confirm you see an entry for `core-workflow` under `Workspace` as shown in the screenshot below.
+
+<img src="./assets/images/kiro-ide-aidlc-rules-loaded.png?raw=true" alt="AI-DLC Rules in Kiro IDE" width="700" height="450">
+
+We use Kiro IDE in Vibe mode to run the AI-DLC workflow. This ensures that AI-DLC workflow guides the development workflow in Kiro. At times, Kiro may nudge you to switch to spec mode. Select `No` to such prompts to stay in Vibe mode.
+
+<img src="./assets/images/kiro-sdd-nudge.png?raw=true" alt="Staying in Kiro Vibe mode" width="500" height="175">
+
+#### Verify in Kiro CLI
+
+Run `kiro-cli`, then `/context show`, and confirm entries for `.kiro/steering/aws-aidlc-rules`.
+
+<img src="./assets/images/kiro-cli-aidlc-rules-loaded.png?raw=true" alt="AI-DLC Rules in Kiro CLI" width="700" height="660">
 
 ---
 
-## Cómo usar AI-DLC
+### Amazon Q Developer IDE Plugin/Extension
 
-Una vez instalado, abre tu agente de IA en el proyecto y comienza cualquier tarea con la frase:
+AI-DLC uses [Amazon Q Rules](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/context-project-rules.html) within your project workspace.
 
-```
-Using AI-DLC, [descripción de tu tarea]
-```
+The commands below assume you extracted the zip to your `Downloads` folder. If you used a different location, replace `Downloads` with your actual folder path.
 
-### Ejemplos
+On macOS/Linux:
 
-```
-Using AI-DLC, necesito construir un módulo de búsqueda de vehículos por filtros
-```
-
-```
-Using AI-DLC, agregar autenticación con JWT al API de reservas
+```bash
+mkdir -p .amazonq/rules
+cp -R ~/Downloads/aidlc-rules/aws-aidlc-rules .amazonq/rules/
+cp -R ~/Downloads/aidlc-rules/aws-aidlc-rule-details .amazonq/
 ```
 
+On Windows (PowerShell):
+
+```powershell
+New-Item -ItemType Directory -Force -Path ".amazonq\rules"
+Copy-Item -Recurse "$env:USERPROFILE\Downloads\aidlc-rules\aws-aidlc-rules" ".amazonq\rules\"
+Copy-Item -Recurse "$env:USERPROFILE\Downloads\aidlc-rules\aws-aidlc-rule-details" ".amazonq\"
 ```
-Using AI-DLC, refactorizar el módulo de pagos para soportar múltiples proveedores
+
+On Windows (CMD):
+
+```cmd
+mkdir .amazonq\rules
+xcopy %USERPROFILE%\Downloads\aidlc-rules\aws-aidlc-rules .amazonq\rules\aws-aidlc-rules\ /E /I
+xcopy %USERPROFILE%\Downloads\aidlc-rules\aws-aidlc-rule-details .amazonq\aws-aidlc-rule-details\ /E /I
 ```
 
-AI-DLC evalúa la complejidad de tu pedido y decide qué fases ejecutar. No siempre corre todas — un bugfix simple puede ir directo a Construction sin Inception completo.
+Your project should look like:
 
-### Qué produce
-
-Al final de cada sesión tendrás en `aidlc-docs/`:
-
+```text
+<project-root>/
+    ├── .amazonq/
+    │     ├── rules/
+    │     │     ├── aws-aidlc-rules/
+    │     ├── aws-aidlc-rule-details/
 ```
-aidlc-docs/
-├── aidlc-state.md              ← estado actual del workflow
-├── audit.md                    ← log completo de decisiones con timestamps
-├── inception/
-│   ├── requirements/           ← requisitos funcionales y no funcionales
-│   ├── user-stories/           ← historias de usuario y personas
-│   └── application-design/     ← componentes, servicios, dependencias (equivale al SDD)
-└── construction/
-    ├── {nombre-del-unit}/
-    │   ├── functional-design/  ← lógica de negocio y modelos de dominio
-    │   ├── nfr-design/         ← decisiones de performance, seguridad, escalabilidad
-    │   └── infrastructure-design/
-    └── build-and-test/         ← instrucciones de build, unit tests, integración
+
+To verify the rules are loaded:
+
+1. In the Amazon Q Chat window, click the `Rules` button in the lower right corner.
+2. Confirm you see entries for `.amazonq/rules/aws-aidlc-rules`.
+
+<img src="./assets/images/q-ide-aidlc-rules-loaded.png?raw=true" alt="AI-DLC Rules in Q Developer IDE plugin" width="700" height="400">
+
+---
+
+### Cursor IDE
+
+AI-DLC uses [Cursor Rules](https://cursor.com/docs/context/rules) to implement its intelligent workflow.
+
+The commands below assume you extracted the zip to your `Downloads` folder. If you used a different location, replace `Downloads` with your actual folder path.
+
+#### Option 1: Project Rules (Recommended)
+
+**Unix/Linux/macOS:**
+
+```bash
+mkdir -p .cursor/rules
+
+cat > .cursor/rules/ai-dlc-workflow.mdc << 'EOF'
+---
+description: "AI-DLC (AI-Driven Development Life Cycle) adaptive workflow for software development"
+alwaysApply: true
+---
+
+EOF
+cat ~/Downloads/aidlc-rules/aws-aidlc-rules/core-workflow.md >> .cursor/rules/ai-dlc-workflow.mdc
+
+mkdir -p .aidlc-rule-details
+cp -R ~/Downloads/aidlc-rules/aws-aidlc-rule-details/* .aidlc-rule-details/
+```
+
+**Windows PowerShell:**
+
+```powershell
+New-Item -ItemType Directory -Force -Path ".cursor\rules"
+
+$frontmatter = @"
+---
+description: "AI-DLC (AI-Driven Development Life Cycle) adaptive workflow for software development"
+alwaysApply: true
+---
+
+"@
+$frontmatter | Out-File -FilePath ".cursor\rules\ai-dlc-workflow.mdc" -Encoding utf8
+
+Get-Content "$env:USERPROFILE\Downloads\aidlc-rules\aws-aidlc-rules\core-workflow.md" | Add-Content ".cursor\rules\ai-dlc-workflow.mdc"
+
+New-Item -ItemType Directory -Force -Path ".aidlc-rule-details"
+Copy-Item "$env:USERPROFILE\Downloads\aidlc-rules\aws-aidlc-rule-details\*" ".aidlc-rule-details\" -Recurse
+```
+
+**Windows CMD:**
+
+```cmd
+mkdir .cursor\rules
+
+(
+echo ---
+echo description: "AI-DLC (AI-Driven Development Life Cycle) adaptive workflow for software development"
+echo alwaysApply: true
+echo ---
+echo.
+) > .cursor\rules\ai-dlc-workflow.mdc
+
+type "%USERPROFILE%\Downloads\aidlc-rules\aws-aidlc-rules\core-workflow.md" >> .cursor\rules\ai-dlc-workflow.mdc
+
+mkdir .aidlc-rule-details
+xcopy "%USERPROFILE%\Downloads\aidlc-rules\aws-aidlc-rule-details" ".aidlc-rule-details\" /E /I
+```
+
+#### Option 2: AGENTS.md (Simple Alternative)
+
+**Unix/Linux/macOS:**
+
+```bash
+cp ~/Downloads/aidlc-rules/aws-aidlc-rules/core-workflow.md ./AGENTS.md
+mkdir -p .aidlc-rule-details
+cp -R ~/Downloads/aidlc-rules/aws-aidlc-rule-details/* .aidlc-rule-details/
+```
+
+**Windows PowerShell:**
+
+```powershell
+Copy-Item "$env:USERPROFILE\Downloads\aidlc-rules\aws-aidlc-rules\core-workflow.md" ".\AGENTS.md"
+New-Item -ItemType Directory -Force -Path ".aidlc-rule-details"
+Copy-Item "$env:USERPROFILE\Downloads\aidlc-rules\aws-aidlc-rule-details\*" ".aidlc-rule-details\" -Recurse
+```
+
+**Windows CMD:**
+
+```cmd
+copy "%USERPROFILE%\Downloads\aidlc-rules\aws-aidlc-rules\core-workflow.md" ".\AGENTS.md"
+mkdir .aidlc-rule-details
+xcopy "%USERPROFILE%\Downloads\aidlc-rules\aws-aidlc-rule-details" ".aidlc-rule-details\" /E /I
+```
+
+**Verify Setup:**
+
+1. Open **Cursor Settings → Rules, Commands**
+2. Under **Project Rules**, you should see `ai-dlc-workflow` listed
+3. For `AGENTS.md`, it will be automatically detected and applied
+
+![AI-DLC Rules in Cursor](./assets/images/cursor-ide-aidlc-rules-loaded.png?raw=true "AI-DLC Rules in Cursor")
+
+**Directory Structure (Option 1):**
+
+```text
+<my-project>/
+├── .cursor/
+│   └── rules/
+│       └── ai-dlc-workflow.mdc
+└── .aidlc-rule-details/
+    ├── common/
+    ├── inception/
+    ├── construction/
+    ├── extensions/
+    └── operations/
 ```
 
 ---
@@ -137,135 +279,79 @@ aidlc-docs/
 
 Commitea `aidlc-docs/` al **cerrar la feature**, junto con el código generado:
 
-```bash
-git add aidlc-docs/ src/ ...
-git commit -m "feat(busqueda-vehiculos): implementar filtros por marca y modelo"
-```
-
-El `audit.md` y `aidlc-state.md` también se commitean — son el historial de por qué se tomaron las decisiones de diseño.
-
-### Continuidad entre sesiones
-
-Si una sesión queda interrumpida, AI-DLC detecta el `aidlc-state.md` existente al arrancar y ofrece retomar desde donde quedó:
-
-```
-Sesión anterior detectada.
-  Feature: búsqueda de vehículos
-  Última etapa completada: User Stories
-  Siguiente etapa: Workflow Planning
-
-¿Retomar desde aquí o iniciar desde el principio?
-```
-
----
-
-## Flujo multi-feature
-
-El `aidlc-state.md` maneja **un estado por rama**. La convención en CarConnect es **una rama por feature**, lo que naturalmente aísla el `aidlc-docs/` de cada sesión.
-
-### Ejemplo
+**Unix/Linux/macOS:**
 
 ```bash
-# Feature 1
-git checkout -b feat/busqueda-vehiculos
-setup-aidlc   # si no estaba instalado aún
-# → "Using AI-DLC, construir búsqueda de vehículos..."
-# → AI-DLC genera aidlc-docs/ para esta feature
-git add aidlc-docs/ src/
-git commit -m "feat(busqueda-vehiculos): implementar búsqueda con filtros"
-git push origin feat/busqueda-vehiculos
-# → PR → merge a main
-
-# Feature 2 (desde main actualizado)
-git checkout main && git pull
-git checkout -b feat/sistema-reservas
-# → "Using AI-DLC, construir sistema de reservas..."
-# → aidlc-docs/ empieza limpio para esta feature
+mkdir -p .clinerules
+cp ~/Downloads/aidlc-rules/aws-aidlc-rules/core-workflow.md .clinerules/
+mkdir -p .aidlc-rule-details
+cp -R ~/Downloads/aidlc-rules/aws-aidlc-rule-details/* .aidlc-rule-details/
 ```
 
-Al mergear a `main`, los `aidlc-docs/` de cada feature se acumulan y quedan como documentación histórica del proyecto.
+**Windows PowerShell:**
 
-### ¿Qué pasa si dos devs trabajan en el mismo proyecto simultáneamente?
+```powershell
+New-Item -ItemType Directory -Force -Path ".clinerules"
+Copy-Item "$env:USERPROFILE\Downloads\aidlc-rules\aws-aidlc-rules\core-workflow.md" ".clinerules\"
+New-Item -ItemType Directory -Force -Path ".aidlc-rule-details"
+Copy-Item "$env:USERPROFILE\Downloads\aidlc-rules\aws-aidlc-rule-details\*" ".aidlc-rule-details\" -Recurse
+```
 
-Cada uno en su rama — no hay conflicto. El `aidlc-docs/` vive en la rama de la feature hasta el merge.
+**Windows CMD:**
 
----
+```cmd
+mkdir .clinerules
+copy "%USERPROFILE%\Downloads\aidlc-rules\aws-aidlc-rules\core-workflow.md" ".clinerules\"
+mkdir .aidlc-rule-details
+xcopy "%USERPROFILE%\Downloads\aidlc-rules\aws-aidlc-rule-details" ".aidlc-rule-details\" /E /I
+```
 
-## Proyectos brownfield
+#### Option 2: AGENTS.md (Alternative)
 
-En proyectos con código existente, AI-DLC ejecuta primero una fase de **Reverse Engineering** antes de arrancar. Esta fase analiza el codebase y genera:
-
-| Artefacto              | Descripción                             |
-| ---------------------- | --------------------------------------- |
-| `business-overview.md` | Transacciones de negocio del sistema    |
-| `architecture.md`      | Diagrama de arquitectura actual         |
-| `code-structure.md`    | Inventario de archivos y su propósito   |
-| `api-documentation.md` | Endpoints y modelos de datos existentes |
-| `technology-stack.md`  | Lenguajes, frameworks, dependencias     |
-| `dependencies.md`      | Dependencias internas y externas        |
-
-Estos artefactos se generan en `aidlc-docs/inception/reverse-engineering/` y se commitean. En sesiones posteriores, AI-DLC los carga automáticamente para no repetir el análisis.
-
-### Primera vez en un proyecto brownfield
+**Unix/Linux/macOS:**
 
 ```bash
-cd mi-proyecto-existente
-setup-aidlc
-# → "Using AI-DLC, agregar módulo de notificaciones push"
-# → AI-DLC detecta código existente → ejecuta Reverse Engineering primero
-# → Te pide aprobar el análisis antes de continuar con Requirements
+cp ~/Downloads/aidlc-rules/aws-aidlc-rules/core-workflow.md ./AGENTS.md
+mkdir -p .aidlc-rule-details
+cp -R ~/Downloads/aidlc-rules/aws-aidlc-rule-details/* .aidlc-rule-details/
 ```
 
-### Segunda sesión en adelante
+**Windows PowerShell:**
 
-```bash
-# AI-DLC detecta aidlc-docs/inception/reverse-engineering/ existente
-# → Lo carga directamente, no repite el análisis
-# → Arranca directo en Requirements Analysis
+```powershell
+Copy-Item "$env:USERPROFILE\Downloads\aidlc-rules\aws-aidlc-rules\core-workflow.md" ".\AGENTS.md"
+New-Item -ItemType Directory -Force -Path ".aidlc-rule-details"
+Copy-Item "$env:USERPROFILE\Downloads\aidlc-rules\aws-aidlc-rule-details\*" ".aidlc-rule-details\" -Recurse
 ```
 
----
+**Windows CMD:**
 
-## Extensiones CarConnect
+```cmd
+copy "%USERPROFILE%\Downloads\aidlc-rules\aws-aidlc-rules\core-workflow.md" ".\AGENTS.md"
+mkdir .aidlc-rule-details
+xcopy "%USERPROFILE%\Downloads\aidlc-rules\aws-aidlc-rule-details" ".aidlc-rule-details\" /E /I
+```
 
-Las extensiones aplican como **constraints bloqueantes** en todos los proyectos de CarConnect. Al inicio de cada sesión AI-DLC, el agente pregunta si cada extensión aplica a la feature en curso — si la respuesta es No, se ignora completamente para esa sesión.
+**Verify Setup:**
 
-### Resumen de extensiones
+1. In Cline's chat interface, look for the Rules popover under the chat input field
+2. Verify that `core-workflow.md` is listed and active
+3. You can toggle the rule file on/off as needed
 
-| Extensión                           | Reglas         | Cuándo activa                                     |
-| ----------------------------------- | -------------- | ------------------------------------------------- |
-| `company-standards/language`        | LANG-01/02/03  | Siempre                                           |
-| `company-standards/git-conventions` | GIT-01/02/03   | Siempre                                           |
-| `security/baseline`                 | SECURITY-01…15 | Siempre                                           |
-| `compliance/data-privacy`           | PRIVACY-01…06  | Features con PII de usuarios                      |
-| `compliance/marketplace-trust`      | TRUST-01…06    | Features de listados, búsqueda o transacciones    |
-| `performance/search-inventory`      | PERF-01…06     | Features de búsqueda o listado de inventario      |
-| `testing/marketplace-flows`         | TEST-01…04     | Features en flujos críticos end-to-end            |
-| `data-quality/vehicle-data`         | VDATA-01…05    | Features que crean o modifican datos de vehículos |
-| `accessibility/wcag-baseline`       | A11Y-01…05     | Features con interfaz de usuario                  |
-| `multi-repo-context`                | MRC-01…06      | Épicas que tocan más de un repositorio            |
+![AI-DLC Rules in Cline](./assets/images/cline-ide-aidlc-rules-loaded.png?raw=true "AI-DLC Rules in Cline")
 
----
+**Directory Structure (Option 1):**
 
-### Estándar de idioma (`company-standards/language/`)
-
-**Reglas LANG-01, LANG-02, LANG-03**
-
-- Toda comunicación del agente con el usuario: **español**
-- Toda documentación generada en `aidlc-docs/`: **español**
-- Código fuente (variables, funciones, clases, archivos): **inglés**
-- Comentarios de regla de negocio compleja: pueden ir en español si aportan claridad
-
-```typescript
-// ✅ Correcto
-/**
- * Validates that the vehicle listing is within the seller's active limit.
- * Regla de negocio: vendedores particulares tienen máximo 3 listados activos simultáneos.
- */
-function validateListingLimit(sellerId: string, plan: SellerPlan): boolean { ... }
-
-// ❌ Incorrecto — identificador en español
-function validarLimiteDePropiedades(idVendedor: string): boolean { ... }
+```text
+<my-project>/
+├── .clinerules/
+│   └── core-workflow.md
+└── .aidlc-rule-details/
+    ├── common/
+    ├── inception/
+    ├── construction/
+    ├── extensions/
+    └── operations/
 ```
 
 ---
@@ -276,298 +362,362 @@ function validarLimiteDePropiedades(idVendedor: string): boolean { ... }
 
 Todo commit y branch propuesto por el agente sigue Conventional Commits y kebab-case.
 
-```bash
-# ✅ Correcto
-feat(listados): agregar validación de límite por vendedor
-fix(busqueda): corregir índice de filtro por precio
-chore(deps): actualizar dependencias de seguridad
-
-# ❌ Incorrecto
-git commit -m "cambios en listados"
-git commit -m "fix"
-git commit -m "wip"
-```
+**Unix/Linux/macOS:**
 
 ```bash
-# ✅ Branches correctos
-feat/modulo-listados-vehiculos
-fix/validacion-vin-duplicado
-refactor/motor-de-busqueda
-
-# ❌ Branches incorrectos
-feature/ListadosVehiculos
-dev/ronnie-cambios
-fix_vin
+cp ~/Downloads/aidlc-rules/aws-aidlc-rules/core-workflow.md ./CLAUDE.md
+mkdir -p .aidlc-rule-details
+cp -R ~/Downloads/aidlc-rules/aws-aidlc-rule-details/* .aidlc-rule-details/
 ```
 
----
+**Windows PowerShell:**
 
-### Seguridad baseline (`security/baseline/`)
-
-**Reglas SECURITY-01…15** — provistas por AWS, cubre OWASP Top 10.
-
-Ejemplos de lo que verifica el agente:
-
-```typescript
-// SECURITY-05: Input validation en todos los endpoints
-// ✅ El agente exige esto en el diseño de cualquier endpoint
-app.post('/listings', validateBody(listingSchema), async (req, res) => { ... })
-
-// SECURITY-04: HTTP security headers
-// ✅ El agente exige documentar estos headers en infrastructure design
-helmet({
-  contentSecurityPolicy: true,
-  hsts: { maxAge: 31536000 },
-  referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
-})
+```powershell
+Copy-Item "$env:USERPROFILE\Downloads\aidlc-rules\aws-aidlc-rules\core-workflow.md" ".\CLAUDE.md"
+New-Item -ItemType Directory -Force -Path ".aidlc-rule-details"
+Copy-Item "$env:USERPROFILE\Downloads\aidlc-rules\aws-aidlc-rule-details\*" ".aidlc-rule-details\" -Recurse
 ```
 
----
+**Windows CMD:**
 
-### Privacidad de datos (`compliance/data-privacy/`)
-
-**Reglas PRIVACY-01…06** — activa cuando el feature toca PII de usuarios.
-
-```
-Ejemplo de pregunta al inicio de sesión:
-
-  ¿Esta feature recopila, procesa o almacena datos personales de usuarios?
-
-  A) Sí — módulo de registro de vendedores (nombre, RFC, teléfono)  ← activa PRIVACY
-  B) No — módulo de caché de búsqueda                               ← ignora PRIVACY
+```cmd
+copy "%USERPROFILE%\Downloads\aidlc-rules\aws-aidlc-rules\core-workflow.md" ".\CLAUDE.md"
+mkdir .aidlc-rule-details
+xcopy "%USERPROFILE%\Downloads\aidlc-rules\aws-aidlc-rule-details" ".aidlc-rule-details\" /E /I
 ```
 
-Qué bloquea si está activa:
+#### Option 2: .claude Directory
 
-```markdown
-❌ Hallazgo PRIVACY-01 — Catálogo de PII incompleto
-El Functional Design del módulo de registro no lista qué campos de PII
-se almacenan ni con qué propósito. Requerido antes de continuar.
-
-❌ Hallazgo PRIVACY-05 — Logs con PII expuesta
-El diseño del servicio de registro incluye logging del email completo
-del usuario. Debe enmascararse (ej: ro\*\*\*@gmail.com).
-```
-
----
-
-### Confianza de marketplace (`compliance/marketplace-trust/`)
-
-**Reglas TRUST-01…06** — activa cuando el feature involucra listados, perfiles o transacciones.
-
-Qué verifica el agente en el diseño:
-
-```markdown
-✅ TRUST-01 — Límites de publicación documentados
-Functional Design especifica: máximo 3 listados activos para cuentas
-particulares, configurable por administradores sin cambio de código.
-
-✅ TRUST-02 — Validación de VIN documentada
-El endpoint POST /listings valida: 17 caracteres alfanuméricos,
-sin I/O/Q, dígito verificador calculado. VINs duplicados en listados
-activos generan alerta de moderación.
-
-❌ TRUST-03 — Rate limiting no documentado
-El diseño no especifica límites de requests en GET /search.
-Requerido: documentar throttling por IP y por usuario autenticado.
-```
-
----
-
-### Performance de búsqueda (`performance/search-inventory/`)
-
-**Reglas PERF-01…06** — activa cuando el feature involucra búsqueda o listado de inventario.
-
-```markdown
-✅ PERF-01 — NFR de latencia documentado
-NFR Requirements especifica: P95 < 300ms, P99 < 500ms para
-GET /search con hasta 50,000 vehículos en inventario.
-
-✅ PERF-02 — Índices documentados
-Schema incluye índice compuesto (make, model, year, price) para
-el filtro de búsqueda principal, y índice geoespacial para
-búsqueda por ubicación.
-
-❌ PERF-04 — Paginación no implementada
-GET /listings no tiene parámetros de limit/offset. Consulta
-sin límite — hallazgo bloqueante.
-```
-
----
-
-### Testing de flujos críticos (`testing/marketplace-flows/`)
-
-**Reglas TEST-01…04** — activa cuando el feature forma parte de un flujo end-to-end crítico.
-
-```markdown
-✅ TEST-01 — Flujos críticos cubiertos
-build-and-test/integration-test-instructions.md documenta:
-
-Flujo 1: Publicación → Visibilidad en búsqueda
-
-- Estado inicial: vendedor autenticado, sin listados activos
-- Pasos: POST /listings → esperar indexación → GET /search?make=Honda
-- Resultado esperado: vehículo aparece en resultados en < 30s
-
-Flujo 2: Oferta → Notificación al vendedor
-
-- Estado inicial: comprador y vendedor con cuentas activas
-- Pasos: POST /offers → verificar evento en cola → GET /notifications/{sellerId}
-- Resultado esperado: notificación entregada en < 5s
-
-✅ TEST-04 — Sin datos reales de producción
-Fixtures usan VINs de prueba (1HGBH41JXMN109186 — VIN de ejemplo
-del estándar ISO), emails @example.com, y teléfonos +52 55 0000 0000.
-```
-
----
-
-### Calidad de datos de vehículos (`data-quality/vehicle-data/`)
-
-**Reglas VDATA-01…05** — activa cuando el feature crea o modifica datos de vehículos.
-
-```typescript
-// ✅ Lo que el agente exige en el código generado
-
-// VDATA-01: Validación de VIN
-function isValidVin(vin: string): boolean {
-  if (vin.length !== 17) return false;
-  if (/[IOQ]/i.test(vin)) return false;
-  return /^[A-HJ-NPR-Z0-9]{17}$/i.test(vin);
-}
-
-// VDATA-03: Precio como entero en centavos, con sanity checks
-const listingSchema = z.object({
-  priceInCents: z.number().int().min(1_000_000).max(500_000_000), // MXN $10k–$5M
-  currency: z.literal("MXN"),
-});
-
-// VDATA-02: Año en rango válido y configurable
-const currentYear = new Date().getFullYear();
-const yearSchema = z
-  .number()
-  .int()
-  .min(1885)
-  .max(currentYear + 2);
-```
-
----
-
-### Accesibilidad WCAG (`accessibility/wcag-baseline/`)
-
-**Reglas A11Y-01…05** — activa cuando el feature incluye componentes de UI.
-
-```tsx
-// ✅ A11Y-01: Formulario de búsqueda accesible
-<form role="search">
-  <label htmlFor="search-input">Buscar vehículos</label>
-  <input
-    id="search-input"
-    type="search"
-    aria-label="Buscar por marca, modelo o año"
-    aria-describedby="search-hint"
-  />
-  <span id="search-hint">Ejemplo: Honda Civic 2022</span>
-</form>
-
-// ❌ A11Y-01: Input sin label — hallazgo bloqueante
-<input type="text" placeholder="Buscar vehículos..." />
-
-// ✅ A11Y-05: Modal con gestión de foco correcta
-function VehicleDetailModal({ onClose }) {
-  const firstFocusRef = useRef(null)
-  useEffect(() => { firstFocusRef.current?.focus() }, [])
-  return (
-    <dialog aria-modal="true" aria-label="Detalle del vehículo">
-      <button ref={firstFocusRef} onClick={onClose}>Cerrar</button>
-      {/* contenido */}
-    </dialog>
-  )
-}
-```
-
----
-
-### Contexto multi-repo (`multi-repo-context/`)
-
-**Reglas MRC-01…06** — activa cuando la épica involucra más de un repositorio.
-
-Resuelve el problema de que el agente planifique integraciones sin conocer los contratos reales de los otros servicios. Antes de generar cualquier plan, la extensión obliga al agente a entender qué consume y qué emite cada repo involucrado.
-
-**Cómo se activa**: durante Requirements Analysis, AI-DLC pregunta si la épica toca más de un repo. Si la respuesta es sí, se carga la extensión completa y bloquea el avance a CONSTRUCTION hasta que todos los contratos estén resueltos.
-
-**Resolución por tiers** — el agente lee la mínima cantidad de contexto necesaria:
-
-| Tier | Qué hace                                                                                 |
-| ---- | ---------------------------------------------------------------------------------------- |
-| 0    | Carga contexto de épicas anteriores y verifica si hubo drift                             |
-| 1    | Lee `docs/context.md` y `docs/integrations.md` del repo                                  |
-| 2    | Lee todos los archivos en `docs/` si Tier 1 no alcanzó                                   |
-| 3    | Lista el árbol del repo e infiere contratos por nombre de archivo, sin importar el stack |
-| 4    | Lee el archivo de código puntual si la lógica interna afecta el contrato                 |
-
-El agente avanza al siguiente tier solo si el anterior no fue suficiente para responder: qué consume el repo, qué emite, y qué tecnología usa.
-
-**Estándar `docs/` recomendado**: cada repo debería tener dos archivos mínimos que el equipo mantiene:
-
-```
-docs/
-├── context.md       ← qué hace el servicio, inputs, outputs, tecnología
-└── integrations.md  ← de qué repos depende, qué expone hacia otros
-```
-
-Si los archivos no existen, la extensión los infiere por tiers y al finalizar ofrece generarlos como PR — así el estándar se construye solo con el uso.
-
-**Prompt sugerido para generar los archivos en un repo existente**:
-
-Corre esto dentro del repo que quieres documentar:
-
-```
-Using AI-DLC, genera los archivos docs/context.md y docs/integrations.md para este repositorio
-```
-
-El agente analiza el codebase, infiere inputs, outputs e integraciones, y produce los dos archivos listos para revisar y commitear. No es parte del flujo de épica — es un comando puntual para bootstrapear el estándar.
-
-**Prerequisito — MCP GitHub**:
-
-Para leer repos externos (Tier 0–2), el agente necesita el servidor MCP de GitHub configurado. Sin él, solo puede leer el repo activo localmente — los repos externos caen directo a Tier 3 usando el árbol local si están clonados, o quedan como no resolubles si no lo están.
-
-Instalación en Claude Code — corre este comando una vez (fuera del CLI, en tu terminal):
+**Unix/Linux/macOS:**
 
 ```bash
-claude mcp add-json github '{"type":"http","url":"https://api.githubcopilot.com/mcp","headers":{"Authorization":"Bearer TU_GITHUB_PAT"}}' --scope user
+mkdir -p .claude
+cp ~/Downloads/aidlc-rules/aws-aidlc-rules/core-workflow.md .claude/CLAUDE.md
+mkdir -p .aidlc-rule-details
+cp -R ~/Downloads/aidlc-rules/aws-aidlc-rule-details/* .aidlc-rule-details/
 ```
 
-`--scope user` lo deja disponible en todos tus proyectos. El token necesita permisos `repo` (lectura) — generalo en [github.com/settings/personal-access-tokens/new](https://github.com/settings/personal-access-tokens/new).
+**Windows PowerShell:**
 
-Verificá que quedó instalado:
+```powershell
+New-Item -ItemType Directory -Force -Path ".claude"
+Copy-Item "$env:USERPROFILE\Downloads\aidlc-rules\aws-aidlc-rules\core-workflow.md" ".claude\CLAUDE.md"
+New-Item -ItemType Directory -Force -Path ".aidlc-rule-details"
+Copy-Item "$env:USERPROFILE\Downloads\aidlc-rules\aws-aidlc-rule-details\*" ".aidlc-rule-details\" -Recurse
+```
+
+**Windows CMD:**
+
+```cmd
+mkdir .claude
+copy "%USERPROFILE%\Downloads\aidlc-rules\aws-aidlc-rules\core-workflow.md" ".claude\CLAUDE.md"
+mkdir .aidlc-rule-details
+xcopy "%USERPROFILE%\Downloads\aidlc-rules\aws-aidlc-rule-details" ".aidlc-rule-details\" /E /I
+```
+
+**Verify Setup:**
+
+1. Start Claude Code in your project directory (CLI: `claude` or VS Code extension)
+2. Use the `/config` command to view current configuration
+3. Ask Claude: "What instructions are currently active in this project?"
+
+**Directory Structure (Option 1):**
+
+```text
+<my-project>/
+├── CLAUDE.md
+└── .aidlc-rule-details/
+    ├── common/
+    ├── inception/
+    ├── construction/
+    ├── extensions/
+    └── operations/
+```
+
+---
+
+### GitHub Copilot
+
+AI-DLC uses [GitHub Copilot custom instructions](https://code.visualstudio.com/docs/copilot/customization/custom-instructions) to implement its intelligent workflow. The `.github/copilot-instructions.md` file is automatically detected and applied to all chat requests in the workspace.
+
+The commands below assume you extracted the zip to your `Downloads` folder. If you used a different location, replace `Downloads` with your actual folder path.
+
+**Unix/Linux/macOS:**
 
 ```bash
-claude mcp list
+mkdir -p .github
+cp ~/Downloads/aidlc-rules/aws-aidlc-rules/core-workflow.md .github/copilot-instructions.md
+mkdir -p .aidlc-rule-details
+cp -R ~/Downloads/aidlc-rules/aws-aidlc-rule-details/* .aidlc-rule-details/
 ```
 
-Con esto, el agente puede leer `docs/context.md` de `micro-pagos` aunque estés trabajando en `frontend-dealership`.
+**Windows PowerShell:**
 
-**Ejemplo de lo que produce antes de CONSTRUCTION**:
+```powershell
+New-Item -ItemType Directory -Force -Path ".github"
+Copy-Item "$env:USERPROFILE\Downloads\aidlc-rules\aws-aidlc-rules\core-workflow.md" ".github\copilot-instructions.md"
+New-Item -ItemType Directory -Force -Path ".aidlc-rule-details"
+Copy-Item "$env:USERPROFILE\Downloads\aidlc-rules\aws-aidlc-rule-details\*" ".aidlc-rule-details\" -Recurse
+```
 
-```markdown
-## Integration Contracts
+**Windows CMD:**
 
-### micro-pagos
+```cmd
+mkdir .github
+copy "%USERPROFILE%\Downloads\aidlc-rules\aws-aidlc-rules\core-workflow.md" ".github\copilot-instructions.md"
+mkdir .aidlc-rule-details
+xcopy "%USERPROFILE%\Downloads\aidlc-rules\aws-aidlc-rule-details" ".aidlc-rule-details\" /E /I
+```
 
-Consumes: SQS pagos-confirmacion-queue — evento LeadConfirmado
-Emits: EventBridge — PagoAprobado | PagoRechazado
-Contract source: Tier 1 — docs/context.md + docs/integrations.md
+**Verify Setup:**
 
-### micro-leads
+1. Open VS Code with your project folder
+2. Open the Copilot Chat panel (Cmd/Ctrl+Shift+I)
+3. Select **Configure Chat** (gear icon) > **Chat Instructions** and verify that `copilot-instructions` is listed
+4. Alternatively, type `/instructions` in the chat input to view active instructions
 
-Consumes: REST API interna — GET /leads/{id}
-Emits: EventBridge — LeadConfirmado
-Contract source: Tier 3 — inferido de src/events/lead-confirmed.ts
+**Directory Structure:**
 
-## Unresolved Questions
+```text
+<my-project>/
+├── .github/
+│   └── copilot-instructions.md
+└── .aidlc-rule-details/
+    ├── common/
+    ├── inception/
+    ├── construction/
+    ├── extensions/
+    └── operations/
+```
 
-(ninguna)
+---
+
+### Other Agents
+
+AI-DLC works with any coding agent that supports project-level rules or steering files. The general approach:
+
+1. Place `aws-aidlc-rules/` wherever your agent reads project rules from (consult your agent's documentation).
+2. Place `aws-aidlc-rule-details/` at a sibling level so the rules can reference it.
+
+If your agent has no convention for rules files, place both folders at your project root and point the agent to `aws-aidlc-rules/` as its rules directory.
+
+---
+
+## Usage
+
+1. Start any software development project by stating your intent starting with the phrase **"Using AI-DLC, ..."** in the chat
+2. AI-DLC workflow automatically activates and guides you from there
+3. Answer structured questions that AI-DLC asks you
+4. Carefully review every plan that AI generates. Provide your oversight and validation
+5. Review the execution plan to see which stages will run
+6. Carefully review the artifacts and approve each stage to maintain control
+7. All the artifacts will be generated in the `aidlc-docs/` directory
+
+---
+
+## Three-Phase Adaptive Workflow
+
+AI-DLC follows a structured three-phase approach that adapts to your project's complexity:
+
+### 🔵 INCEPTION PHASE
+
+Determines **WHAT** to build and **WHY**
+
+- Requirements analysis and validation
+- User story creation (when applicable)
+- Application Design and creating units of work for parallel development
+- Risk assessment and complexity evaluation
+
+### 🟢 CONSTRUCTION PHASE
+
+Determines **HOW** to build it
+
+- Detailed component design
+- Code generation and implementation
+- Build configuration and testing strategies
+- Quality assurance and validation
+
+### 🟡 OPERATIONS PHASE
+
+Deployment and monitoring (future)
+
+- Deployment automation and infrastructure
+- Monitoring and observability setup
+- Production readiness validation
+
+---
+
+## Key Features
+
+| Feature                   | Description                                                                                               |
+| ------------------------- | --------------------------------------------------------------------------------------------------------- |
+| **Adaptive Intelligence** | Only executes stages that add value to your specific request                                              |
+| **Context-Aware**         | Analyzes existing codebase and complexity requirements                                                    |
+| **Risk-Based**            | Complex changes get comprehensive treatment, simple changes stay efficient                                |
+| **Question-Driven**       | Structured multiple-choice questions in files, not chat                                                   |
+| **Always in Control**     | Review execution plans and approve each phase                                                             |
+| **Extensible**            | Layer custom rules e.g. security, compliance, and organization-specific rules on top of the core workflow |
+
+---
+
+## Extensions
+
+AI-DLC supports an extension system that lets you layer additional rules on top of the core workflow. Extensions are markdown files organized under `aws-aidlc-rule-details/extensions/` and grouped by category (e.g., `security/`, `testing/`).
+
+### How Extensions Work
+
+Each extension consists of two files placed in the same directory:
+
+- A **rules file** (e.g., `security-baseline.md`) containing the extension's rules.
+- An **opt-in file** (e.g., `security-baseline.opt-in.md`) containing a structured multiple-choice question presented to the user during Requirements Analysis.
+
+At workflow start, AI-DLC scans the `extensions/` directory and loads only `*.opt-in.md` files. During Requirements Analysis, it presents each opt-in prompt to the user. When the user opts in, the corresponding rules file is loaded (derived by naming convention: strip `.opt-in.md`, append `.md`). When the user opts out, the rules file is never loaded. Extensions without a matching `*.opt-in.md` file are always enforced.
+
+Once enabled, extension rules are blocking constraints — at each stage, the model verifies compliance before allowing the stage to proceed.
+
+### Built-in Extensions
+
+The `extensions/` directory ships with the following (new extensions may be added over time):
+
+```text
+aws-aidlc-rule-details/
+└── extensions/
+    ├── security/                      # Extension category
+    │   └── baseline/
+    │       ├── security-baseline.md          # Baseline security rules
+    │       └── security-baseline.opt-in.md   # Opt-in prompt
+    └── testing/                       # Extension category
+        └── property-based/
+            ├── property-based-testing.md          # Property-based testing rules
+            └── property-based-testing.opt-in.md   # Opt-in prompt
+```
+
+> [!IMPORTANT]
+> The security extension rules are provided as a directional reference for building effective security rules within AI-DLC workflows. Each organization should build, customize, and thoroughly test their own security rules before deploying in production workflows.
+
+### Adding Your Own Extensions
+
+You can extend an existing category or create an entirely new one.
+
+1. Create a directory under `extensions/` (e.g., `security/compliance/` or `performance/baseline/`).
+2. Add a **rules file** (e.g., `compliance.md`). Follow the same structure as `security-baseline.md`:
+   - Define each rule as a heading in the format `## Rule <PREFIX-NN>: <Title>` where the prefix is a short category identifier and NN is a sequential number (e.g., `COMPLIANCE-01`, `COMPLIANCE-02`). These IDs are referenced in audit logs and compliance summaries, so they must be unique across all loaded extensions.
+   - Include a **Rule** section describing the requirement.
+   - Include a **Verification** section with concrete checks the model should evaluate.
+3. Add a matching **opt-in file** using the naming convention `<name>.opt-in.md` (e.g., `compliance.opt-in.md`). See `security-baseline.opt-in.md` for the expected format. Omitting this file means the extension is always enforced with no user opt-out.
+4. Rules are blocking by default — if verification criteria are not met, the stage cannot proceed until the finding is resolved.
+
+---
+
+## Tenets
+
+These are our core principles to guide our decision making.
+
+- **No duplication**. The source of truth lives in one place. If we add support for new tools or formats that require specific files, we generate them from the source rather than maintaining separate copies.
+
+- **Methodology first**. AI-DLC is fundamentally a methodology, not a tool. Users shouldn't need to install anything to get started. That said, we're open to convenience tooling (scripts, CLIs) down the road if it helps users adopt or extend the methodology.
+
+- **Reproducible**. Rules should be clear enough that different models produce similar outcomes. We know models behave differently, but the methodology should minimize variance through explicit guidance.
+
+- **Agnostic**. The methodology works with any IDE, agent, or model. We don't tie ourselves to specific tools or vendors.
+
+- **Human in the loop**. Critical decisions require explicit user confirmation. The agent proposes, the human approves.
+
+---
+
+## Prerequisites
+
+Have one of our supported platforms/tools for Assisted AI Coding installed:
+
+| Platform                      | Installation Link                                                                                                                                               |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Kiro                          | [Install](https://kiro.dev/)                                                                                                                                    |
+| Kiro CLI                      | [Install](https://kiro.dev/cli/)                                                                                                                                |
+| Amazon Q Developer IDE Plugin | [Install](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/q-in-IDE.html)                                                                               |
+| Cursor IDE                    | [Install](https://cursor.com/)                                                                                                                                  |
+| Cline VS Code Extension       | [Install](https://marketplace.visualstudio.com/items?itemName=saoudrizwan.claude-dev)                                                                           |
+| Claude Code CLI               | [Install](https://github.com/anthropics/claude-code)                                                                                                            |
+| GitHub Copilot                | [Install](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot) + [Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat) |
+
+---
+
+## Troubleshooting
+
+### General Issues
+
+| Problem                      | Solution                                                    |
+| ---------------------------- | ----------------------------------------------------------- |
+| Rules not loading            | Check file exists in the correct location for your platform |
+| File encoding issues         | Ensure files are UTF-8 encoded                              |
+| Rules not applied in session | Start a new chat session after file changes                 |
+| Rule details not loading     | Verify `.aidlc-rule-details/` exists with subdirectories    |
+
+### Platform-Specific Issues
+
+#### Kiro
+
+- Use `/context show` in Kiro CLI to verify rules are loaded
+- Check `.kiro/steering/` directory structure
+- Note: Kiro uses `aws-aidlc-rule-details` (not `.aidlc-rule-details/`) under the `.kiro/` directory
+
+#### Amazon Q Developer
+
+- Check `.amazonq/rules/` directory structure
+- Verify rules are listed in the Amazon Q Chat Rules panel
+- Note: Amazon Q uses `aws-aidlc-rule-details` (not `.aidlc-rule-details/`) under the `.amazonq/` directory
+
+#### Cursor
+
+- For "Apply Intelligently", ensure a description is defined in frontmatter
+- Check **Cursor Settings → Rules** to ensure the rule is enabled
+- If rule is too large (>500 lines), split into multiple focused rules
+
+#### Cline
+
+- Check the Rules popover under the chat input field
+- Toggle rule files on/off as needed using the popover UI
+
+#### Claude Code
+
+- Use `/config` command to view current configuration
+- Ask "What instructions are currently active in this project?"
+
+#### GitHub Copilot
+
+- Select **Configure Chat** (gear icon) > **Chat Instructions** to verify instructions are loaded
+- Type `/instructions` in the chat input to view active instruction files
+- Check that `.github/copilot-instructions.md` exists in your workspace root
+
+### File Path Issues on Windows
+
+- Use forward slashes `/` in file paths within markdown files
+- Windows paths with backslashes may not work correctly
+
+---
+
+## Version Control Recommendations
+
+**Commit to repository:**
+
+```gitignore
+# These should be version controlled
+CLAUDE.md
+AGENTS.md
+.amazonq/rules/
+.amazonq/aws-aidlc-rule-details/
+.kiro/steering/
+.kiro/aws-aidlc-rule-details/
+.cursor/rules/
+.clinerules/
+.github/copilot-instructions.md
+.aidlc-rule-details/
+```
+
+**Optional - Add to `.gitignore` (if needed):**
+
+```gitignore
+# Local-only settings
+.claude/settings.local.json
 ```
 
 ---
@@ -578,31 +728,31 @@ For the complete reference of all documentation artifacts generated by the AI-DL
 
 ---
 
-## Recursos
+## Additional Resources
 
-| Recurso                                             | Link                                                                                                                                 |
-| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| Repo upstream (AWS)                                 | [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows)                                                                |
-| Blog de lanzamiento                                 | [AWS DevOps Blog](https://aws.amazon.com/blogs/devops/open-sourcing-adaptive-workflows-for-ai-driven-development-life-cycle-ai-dlc/) |
-| Walkthrough con Amazon Q                            | [AWS DevOps Blog](https://aws.amazon.com/blogs/devops/building-with-ai-dlc-using-amazon-q-developer/)                                |
-| Method Definition Paper                             | [Paper](https://prod.d13rzhkk8cj2z0.amplifyapp.com/)                                                                                 |
-| Resource                                            | Link                                                                                                                                 |
-| ----------                                          | ------                                                                                                                               |
-| AI-DLC Method Definition Paper                      | [Paper](https://prod.d13rzhkk8cj2z0.amplifyapp.com/)                                                                                 |
-| AI-DLC Methodology Blog                             | [AWS Blog](https://aws.amazon.com/blogs/devops/ai-driven-development-life-cycle/)                                                    |
-| AI-DLC Open-source Launch Blog                      | [AWS Blog](https://aws.amazon.com/blogs/devops/open-sourcing-adaptive-workflows-for-ai-driven-development-life-cycle-ai-dlc/)        |
-| AI-DLC Example Walkthrough Blog                     | [AWS Blog](https://aws.amazon.com/blogs/devops/building-with-ai-dlc-using-amazon-q-developer/)                                       |
-| Amazon Q Developer Documentation                    | [Docs](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/q-in-IDE.html)                                                       |
-| Kiro CLI Documentation                              | [Docs](https://kiro.dev/docs/cli/steering/)                                                                                          |
-| Cursor Rules Documentation                          | [Docs](https://cursor.com/docs/context/rules)                                                                                        |
-| Claude Code Documentation                           | [GitHub](https://github.com/anthropics/claude-code)                                                                                  |
-| GitHub Copilot Documentation                        | [Docs](https://docs.github.com/en/copilot)                                                                                           |
-| Working with AI-DLC (interaction patterns and tips) | [docs/WORKING-WITH-AIDLC.md](docs/WORKING-WITH-AIDLC.md)                                                                             |
-| Contributing Guidelines                             | [CONTRIBUTING.md](CONTRIBUTING.md)                                                                                                   |
-| Code of Conduct                                     | [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)                                                                                             |
+<!-- TODO: Replace this Amplify URL with a permanent/stable URL when available -->
+
+| Resource                                            | Link                                                                                                                          |
+| --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| AI-DLC Method Definition Paper                      | [Paper](https://prod.d13rzhkk8cj2z0.amplifyapp.com/)                                                                          |
+| AI-DLC Methodology Blog                             | [AWS Blog](https://aws.amazon.com/blogs/devops/ai-driven-development-life-cycle/)                                             |
+| AI-DLC Open-source Launch Blog                      | [AWS Blog](https://aws.amazon.com/blogs/devops/open-sourcing-adaptive-workflows-for-ai-driven-development-life-cycle-ai-dlc/) |
+| AI-DLC Example Walkthrough Blog                     | [AWS Blog](https://aws.amazon.com/blogs/devops/building-with-ai-dlc-using-amazon-q-developer/)                                |
+| Amazon Q Developer Documentation                    | [Docs](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/q-in-IDE.html)                                                |
+| Kiro CLI Documentation                              | [Docs](https://kiro.dev/docs/cli/steering/)                                                                                   |
+| Cursor Rules Documentation                          | [Docs](https://cursor.com/docs/context/rules)                                                                                 |
+| Claude Code Documentation                           | [GitHub](https://github.com/anthropics/claude-code)                                                                           |
+| GitHub Copilot Documentation                        | [Docs](https://docs.github.com/en/copilot)                                                                                    |
+| Working with AI-DLC (interaction patterns and tips) | [docs/WORKING-WITH-AIDLC.md](docs/WORKING-WITH-AIDLC.md)                                                                      |
+| Contributing Guidelines                             | [CONTRIBUTING.md](CONTRIBUTING.md)                                                                                            |
+| Code of Conduct                                     | [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)                                                                                      |
 
 ---
 
-## Licencia
+## Security
 
-MIT-0 — ver [LICENSE](LICENSE).
+See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
+
+## License
+
+This library is licensed under the MIT-0 License. See the [LICENSE](LICENSE) file.

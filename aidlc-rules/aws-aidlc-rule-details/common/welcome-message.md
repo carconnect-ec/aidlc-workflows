@@ -24,40 +24,40 @@ AI-DLC es un proceso de desarrollo de software estructurado y flexible que se ad
                          Solicitud del Usuario
                               |
                               v
-        ╔═══════════════════════════════════════╗
-        ║     FASE DE INCEPTION                 ║
-        ║     Planificación y Diseño            ║
-        ╠═══════════════════════════════════════╣
-        ║ • Detección de Workspace (SIEMPRE)    ║
-        ║ • Ingeniería Inversa (COND)           ║
-        ║ • Análisis de Requisitos (SIEMPRE)    ║
-        ║ • Historias de Usuario (CONDICIONAL)  ║
-        ║ • Planificación de Flujo (SIEMPRE)    ║
-        ║ • Diseño de Aplicación (CONDICIONAL)  ║
-        ║ • Generación de Unidades (CONDICIONAL)║
-        ╚═══════════════════════════════════════╝
+        +---------------------------------------+
+        |     INCEPTION PHASE                   |
+        |     Planning & Application Design     |
+        +---------------------------------------+
+        | * Workspace Detection (ALWAYS)        |
+        | * Reverse Engineering (COND)          |
+        | * Requirements Analysis (ALWAYS)      |
+        | * User Stories (CONDITIONAL)          |
+        | * Workflow Planning (ALWAYS)          |
+        | * Application Design (CONDITIONAL)    |
+        | * Units Generation (CONDITIONAL)      |
+        +---------------------------------------+
                               |
                               v
-        ╔═══════════════════════════════════════╗
-        ║     FASE DE CONSTRUCTION              ║
-        ║     Diseño, Implementación y Testing  ║
-        ╠═══════════════════════════════════════╣
-        ║ • Bucle por Unidad (por cada unidad): ║
-        ║   - Diseño Funcional (COND)           ║
-        ║   - Evaluación NFR (COND)             ║
-        ║   - Diseño NFR (COND)                 ║
-        ║   - Diseño de Infraestructura (COND)  ║
-        ║   - Generación de Código (SIEMPRE)    ║
-        ║ • Build y Testing (SIEMPRE)           ║
-        ╚═══════════════════════════════════════╝
+        +---------------------------------------+
+        |     CONSTRUCTION PHASE                |
+        |     Design, Implementation & Test     |
+        +---------------------------------------+
+        | * Per-Unit Loop (for each unit):      |
+        |   - Functional Design (COND)          |
+        |   - NFR Requirements Assess (COND)    |
+        |   - NFR Design (COND)                 |
+        |   - Infrastructure Design (COND)      |
+        |   - Code Generation (ALWAYS)          |
+        | * Build and Test (ALWAYS)             |
+        +---------------------------------------+
                               |
                               v
-        ╔═══════════════════════════════════════╗
-        ║     FASE DE OPERATIONS                ║
-        ║     Placeholder para el Futuro        ║
-        ╠═══════════════════════════════════════╣
-        ║ • Operations (PLACEHOLDER)            ║
-        ╚═══════════════════════════════════════╝
+        +---------------------------------------+
+        |     OPERATIONS PHASE                  |
+        |     Placeholder for Future            |
+        +---------------------------------------+
+        | * Operations (PLACEHOLDER)            |
+        +---------------------------------------+
                               |
                               v
                           Completado
@@ -65,19 +65,22 @@ AI-DLC es un proceso de desarrollo de software estructurado y flexible que se ad
 
 ### Desglose de Fases:
 
-**FASE DE INCEPTION** - *Planificación y Diseño de Aplicación*
+**FASE DE INCEPTION** - _Planificación y Diseño de Aplicación_
+
 - **Propósito**: Determina QUÉ construir y POR QUÉ
 - **Actividades**: Comprender requisitos, analizar código existente (si aplica), planificar el enfoque
 - **Resultado**: Requisitos claros, plan de ejecución, decisiones sobre el número de unidades de trabajo para desarrollo paralelo
 - **Tu Rol**: Responder preguntas, revisar planes, aprobar la dirección
 
-**FASE DE CONSTRUCTION** - *Diseño Detallado, Implementación y Testing*
+**FASE DE CONSTRUCTION** - _Diseño Detallado, Implementación y Testing_
+
 - **Propósito**: Determina CÓMO construirlo
 - **Actividades**: Diseño detallado (cuando se necesite), generación de código, testing comprensivo
 - **Resultado**: Código funcionando, tests, instrucciones de build
 - **Tu Rol**: Revisar diseños, aprobar planes de implementación, validar resultados
 
-**FASE DE OPERATIONS** - *Despliegue y Monitoreo (Futuro)*
+**FASE DE OPERATIONS** - _Despliegue y Monitoreo (Futuro)_
+
 - **Propósito**: Cómo DESPLEGAR y OPERAR el sistema
 - **Estado**: Placeholder para futuros flujos de despliegue y monitoreo
 - **Estado Actual**: Las actividades de build y testing se manejan en la fase de CONSTRUCTION
@@ -101,6 +104,7 @@ AI-DLC es un proceso de desarrollo de software estructurado y flexible que se ad
 6. **Obtendrás código funcionando** con documentación completa y tests
 
 El proceso AI-DLC se adapta a:
+
 - 📋 La claridad y complejidad de tu intención
 - 🔍 El estado del codebase existente
 - 🎯 El alcance e impacto de los cambios
