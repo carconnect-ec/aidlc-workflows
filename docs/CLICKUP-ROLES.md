@@ -43,8 +43,13 @@ flowchart TD
     P1["🧑‍💼 PO\nCrea Stories → NOT STARTED"]
     P2["🧑‍💼 PO\nStories → READY FOR DEV\ncuando el Unit puede arrancar"]
     D1["👨‍💻 Dev\nPlanea Bolts con Claude\nCrea Bolt + 5 Stage Tasks\nAgrega stories al Unit list"]
-    D2["👨‍💻 Dev\nEjecuta Stage Tasks\nPENDING → IN PROGRESS\n→ PENDING REVIEW → DONE"]
-    D3["👨‍💻 Dev\nStories → QA REVIEW\ncuando Build & Test pasa"]
+    D2["👨‍💻 Dev + Claude\nDomain & Functional Design\n→ PENDING REVIEW"]
+    TL1["👷 Tech Lead\nRevisa dominio y flujos\n→ DONE"]
+    D3["👨‍💻 Dev + Claude\nNFR & Architecture Design\n→ PENDING REVIEW"]
+    TL2{"👷 Tech Lead\n¿Arquitectura aprobada?\n⛔ GATE DURO"}
+    RW["👨‍💻 Dev\nRevisar diseño\ncon Claude → NEEDS REWORK"]
+    D4["👨‍💻 Dev + Claude\nCode Generation\n→ Build & Test → DONE"]
+    D5["👨‍💻 Dev\nStories → QA REVIEW"]
     Q1{"🧪 QA\n¿Todos los AC\nde la story pasan?"}
     Q2["🧪 QA\nStory → IMPLEMENTED"]
     Q3["🧪 QA\nCrea Bug task\nStory → HAS ISSUES"]
@@ -53,11 +58,17 @@ flowchart TD
     P1 --> P2
     P2 --> D1
     D1 --> D2
-    D2 --> D3
-    D3 --> Q1
+    D2 --> TL1
+    TL1 --> D3
+    D3 --> TL2
+    TL2 -->|Aprobado → DONE| D4
+    TL2 -->|Rechazado → NEEDS REWORK| RW
+    RW --> D3
+    D4 --> D5
+    D5 --> Q1
     Q1 -->|Sí| Q2
     Q1 -->|No| Q3
-    Q3 -->|Dev corrige| D2
+    Q3 -->|Dev corrige| D4
     Q2 --> P3
     P3 --> P2
 ```
@@ -117,8 +128,8 @@ PENDING → IN PROGRESS → PENDING REVIEW → DONE
 
 | Stage Task | Cuándo mover a IN PROGRESS | Cuándo mover a PENDING REVIEW | Cuándo mover a DONE |
 |------------|---------------------------|-------------------------------|---------------------|
-| Domain & Functional Design | Al arrancar el diseño con Claude | Claude generó el artefacto, hay que revisarlo | PO/Dev aprobó el diseño |
-| NFR & Architecture Design | Al arrancar NFRs con Claude | Claude generó NFRs y ADRs, hay que revisarlos | Dev aprobó la arquitectura |
+| Domain & Functional Design | Al arrancar el diseño con Claude | Claude generó el artefacto, hay que revisarlo | Tech Lead revisó y aprobó dominio y flujos |
+| NFR & Architecture Design | Al arrancar NFRs con Claude | Claude generó NFRs y ADRs, hay que revisarlos | **Tech Lead aprobó la arquitectura** ⛔ GATE — Code Generation no arranca sin esto |
 | Code Generation | Al empezar a generar código | Código generado, dev revisando | Dev aprobó el código |
 | Build & Test | Al ejecutar tests | Tests corriendo, pendiente resultado | Tests pasando ✅ |
 | QA Review | QA abrió la story | — | QA aprobó todas las stories del Bolt |
@@ -141,6 +152,34 @@ Cuando **Build & Test → DONE**:
 - No mueve stories a `IMPLEMENTED` — eso es QA
 - No crea Goals ni folders — eso es el PO
 - No escribe en ClickUp lo que ya está en `aidlc-state.md`
+
+---
+
+## Tech Lead
+
+### Cuándo entra el Tech Lead
+
+En dos momentos por Bolt, ambos cuando un Stage Task aparece en `PENDING REVIEW`:
+
+### Qué revisar en cada gate
+
+**Gate 1 — Domain & Functional Design:**
+- ¿El modelo de dominio tiene sentido? (entidades, relaciones, reglas de negocio)
+- ¿Los flujos funcionales cubren los AC de las stories?
+- Revisión rápida — 15 min máximo
+
+**Gate 2 — NFR & Architecture Design** ⛔ Gate duro:
+- ¿La arquitectura propuesta es correcta para este caso? (ej. Lambda + DynamoDB single-table vs RDS)
+- ¿Los NFRs son realistas y alineados con el resto del sistema?
+- ¿Hay ADRs que documenten decisiones no obvias?
+- **Code Generation no puede arrancar hasta que este gate esté en DONE**
+- Si hay algo mal: mover a `NEEDS REWORK`, comentar qué cambiar, dev itera con Claude
+
+### Lo que el Tech Lead NO hace
+
+- No ejecuta los Stage Tasks — los revisa
+- No escribe el código — aprueba la arquitectura antes de que se escriba
+- No reemplaza al dev — le da el contexto arquitectónico para que ejecute bien
 
 ---
 
