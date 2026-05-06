@@ -36,7 +36,7 @@ ClickUp responde las preguntas del PO:
 | **Unit** | Bloque cohesivo de trabajo derivado del Intent. Análogo a un Epic o Subdominio. Contiene las User Stories que lo implementan. | PO + Dev | List dentro del folder INT-NNN |
 | **Bolt** | Mini-sprint (horas a 1-3 días) que implementa un subconjunto de stories de un Unit, pasando por el ciclo completo: diseño → código → QA. Un Unit tiene 1 o más Bolts. | Dev | Task dentro del Unit list |
 
-**Importante:** Los Bolts no son fases (Diseño, Infra, Build). Son ciclos de ejecución que cada uno implementa stories de principio a fin. Dentro de cada Bolt hay un ciclo fijo de 5 pasos (Stage Tasks).
+**Importante:** Los Bolts no son fases (Diseño, Infra, Build). Son ciclos de ejecución que cada uno implementa stories de principio a fin. Dentro de cada Bolt hay un ciclo de hasta 6 Stage Tasks (algunos son condicionales según la complejidad del Unit).
 
 ---
 
@@ -101,7 +101,7 @@ La unidad de valor. Lo que el PO gestiona, valida y reporta.
 
 **Statuses** (template: `ai-dlc-stories`):
 ```
-NOT STARTED → READY FOR DEV → IN DEVELOPMENT → QA REVIEW → IMPLEMENTED → HAS ISSUES
+NOT STARTED → READY FOR DEV → IN DEVELOPMENT → PENDING REVIEW → QA REVIEW → IMPLEMENTED → HAS ISSUES
 ```
 
 - **NOT STARTED:** El Unit que implementa esta story aún no puede arrancar
@@ -121,7 +121,7 @@ NOT STARTED → READY FOR DEV → IN DEVELOPMENT → QA REVIEW → IMPLEMENTED �
 
 ### 5.2 Stage Task 📋
 
-Los 5 pasos internos de cada Bolt. Viven como subtasks dentro del Bolt task.
+Los pasos internos de cada Bolt. Viven como subtasks dentro del Bolt task. Los primeros 4 son condicionales (se crean solo si aplican al Unit); Code Generation y Build and Test siempre se crean.
 
 | Campo | Tipo | Para qué |
 |-------|------|----------|
@@ -129,13 +129,14 @@ Los 5 pasos internos de cada Bolt. Viven como subtasks dentro del Bolt task.
 | Repo Link | URL | Link al artefacto generado en `aidlc-docs/` |
 | AI Model | Dropdown: Claude / Q / GPT / Otro | Qué modelo se usó |
 
-**Stage Dropdown — 5 valores (por Bolt en Construction):**
+**Stage Dropdown — 6 valores (por Bolt en Construction):**
 ```
-1. Domain & Functional Design   → AI modela el dominio y flujos funcionales
-2. NFR & Architecture Design    → AI define NFRs y arquitectura, dev valida ADRs
-3. Code Generation              → AI genera el código, dev revisa
-4. Build & Test                 → AI genera tests, dev ejecuta y valida
-5. QA Review                    → QA valida stories desde perspectiva de usuario
+1. Functional Design        → AI modela dominio, entidades y flujos funcionales        [CONDITIONAL]
+2. NFR Requirements         → AI determina NFRs y selecciona tech stack                [CONDITIONAL]
+3. NFR Design               → AI incorpora patrones NFR y componentes lógicos          [CONDITIONAL]
+4. Infrastructure Design    → AI mapea a servicios AWS reales (SAM, DynamoDB, etc.)   [CONDITIONAL]
+5. Code Generation          → AI genera el código, dev revisa                          [ALWAYS]
+6. Build and Test           → AI genera tests, dev ejecuta y valida                    [ALWAYS]
 ```
 
 **Para Inception** (3 Stage Tasks en la lista Inception, no dentro de Bolts):
@@ -160,10 +161,11 @@ PENDING → IN PROGRESS → PENDING REVIEW → DONE → NEEDS REWORK
 
 | Stage Task bloqueado | Requiere que esté Done |
 |---------------------|------------------------|
-| NFR & Architecture Design | Domain & Functional Design |
-| Code Generation | NFR & Architecture Design |
-| Build & Test | Code Generation |
-| QA Review | Build & Test |
+| NFR Requirements | Functional Design |
+| NFR Design | NFR Requirements |
+| Infrastructure Design | NFR Design |
+| Code Generation | Infrastructure Design ⛔ GATE — requiere aprobación Tech Lead |
+| Build and Test | Code Generation |
 
 ---
 
@@ -264,7 +266,7 @@ Una lista por Unit dentro del folder INT-NNN. Aquí vive la ejecución técnica.
 
 **Qué contiene cada Unit list:**
 - **Bolt tasks** — cada Bolt cubre un subconjunto de stories del Unit
-- **Stage Tasks** — 5 subtasks dentro de cada Bolt (el ciclo interno de Construction)
+- **Stage Tasks** — hasta 6 subtasks dentro de cada Bolt (el ciclo interno de Construction)
 - **Stories** — las mismas stories del Unit aparecen aquí via "Add to multiple lists"
 - **Risks y Decisions** — si surgen durante el trabajo del Unit
 
@@ -274,11 +276,12 @@ Una lista por Unit dentro del folder INT-NNN. Aquí vive la ejecución técnica.
 📋 UNIT-02 — Batch & Document
 
   Bolt 1 — US-003, US-005, US-006  🔨 In Development
-    ↳ [Stage Task] Domain & Functional Design  ✅ Done → aidlc-docs/.../functional-design/
-    ↳ [Stage Task] NFR & Architecture Design   🔨 In Progress
-    ↳ [Stage Task] Code Generation             📋 Pending
-    ↳ [Stage Task] Build & Test                📋 Pending
-    ↳ [Stage Task] QA Review                   📋 Pending
+    ↳ [Stage Task] Functional Design        ✅ Done → aidlc-docs/.../functional-design/
+    ↳ [Stage Task] NFR Requirements         🔨 In Progress
+    ↳ [Stage Task] NFR Design               📋 Pending
+    ↳ [Stage Task] Infrastructure Design    📋 Pending
+    ↳ [Stage Task] Code Generation          📋 Pending
+    ↳ [Stage Task] Build and Test           📋 Pending
 
   US-003 Crear lote de recepción   🔨 In Development  ← misma task de Stories list
   US-005 Cargar doc SINOCASTEL     🟢 Ready for Dev   ← via "Add to multiple lists"
@@ -318,7 +321,7 @@ Cuando un Unit se completa (todas sus stories en ✅ Implemented), las stories d
 |---------|--------|
 | Unit list completada (todas stories ✅) | Stories del Unit dependiente → `🟢 Ready for Dev` |
 | Story movida a `✅ Implemented` | Actualizar Goal target (stories counter +1) |
-| Stage Task `QA Review` → Done | Story del Bolt → `🧪 QA Review` |
+| Stage Task `Build and Test` → Done | Story del Bolt → `QA REVIEW` |
 | Risk con `Blocking = true` creado | Notificar PO + Tech Lead |
 
 ---
@@ -357,7 +360,7 @@ Folders:     INT-[NNN] [Nombre del outcome]
 Lists:       Inception / Stories / UNIT-[NN] [nombre del bounded context]
 Bolts:       Bolt [N] — [US-NNN, US-NNN] (stories que cubre)
 Stories:     US-[NNN] — [Descripción corta]
-Stage Tasks: [Nombre del stage]  (Domain & Functional Design, Code Generation, etc.)
+Stage Tasks: [Nombre del stage]  (Functional Design, NFR Requirements, Code Generation, etc.)
 Risks:       [Risk] [Descripción]
 Decisions:   [ADR] [Título]
 Bugs:        [Bug] [Descripción concisa]
@@ -377,7 +380,7 @@ Bugs:        [Bug] [Descripción concisa]
 7.  PO configura dependencies entre Unit lists
 8.  Dev arranca UNIT-01: planea Bolts con AI, crea Bolt tasks en UNIT-01 list
 9.  Dev agrega stories del Unit a UNIT-01 list via "Add to multiple lists"
-10. Dev ejecuta cada Bolt: 5 Stage Tasks en secuencia (diseño → código → QA)
+10. Dev ejecuta cada Bolt: hasta 6 Stage Tasks en secuencia (diseño → código → tests)
 11. Al terminar Code Generation → dev marca AC técnicos en stories
 12. QA valida → stories a ✅ Implemented
 13. Al completar todas las stories de un Unit → siguiente Unit pasa a Ready for Dev
