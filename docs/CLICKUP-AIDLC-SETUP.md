@@ -83,21 +83,19 @@ Cada Intent = un Goal con targets medibles. Es el portfolio view del CTO/CEO.
 
 ## 5. Custom Task Types (5 tipos — nivel workspace)
 
-> Se crean una sola vez y aplican a todos los Spaces.
+> Se crean una sola vez en Workspace Settings → Task Types. Solo requieren nombre e ícono.
+> Los **Custom Fields** son una configuración separada — se crean en el Space/Folder y se agregan a los tasks que los necesitan.
 
 ### 5.1 User Story 📖
 
 La unidad de valor. Lo que el PO gestiona, valida y reporta.
 
-| Campo | Tipo | Para qué |
-|-------|------|----------|
-| ID | Text | US-001, US-002... |
-| Persona | Dropdown | Quién usa esta funcionalidad |
-| Priority | Dropdown: Must / Should / Could | MoSCoW |
-| Unit | Text | Qué Unit la implementa |
-| Commit/PR | URL | Link al código que la implementa |
+**Custom Field obligatorio:**
+- `Commit/PR` — URL al PR o commit que implementa la story
 
-**Criterios de Aceptación:** Checklist dentro del task (cada item = un criterio verificable).
+Todo lo demás va en el task mismo: el nombre incluye el ID (`US-001 — Descripción`), el Unit se infiere de la lista donde está, la prioridad usa el campo nativo de ClickUp.
+
+**Criterios de Aceptación:** Checklist nativo de ClickUp dentro del task (cada ítem = un criterio verificable).
 
 **Statuses** (template: `ai-dlc-stories`):
 ```
@@ -105,45 +103,42 @@ NOT STARTED → READY FOR DEV → IN DEVELOPMENT → PENDING REVIEW → QA REVIE
 ```
 
 - **NOT STARTED:** El Unit que implementa esta story aún no puede arrancar
-- **READY FOR DEV:** Las dependencias del Unit están resueltas. El dev puede arrancar.
+- **READY FOR DEV:** Las dependencias del Unit están resueltas, el dev puede arrancar
 - **IN DEVELOPMENT:** El Bolt activo está implementando esta story
-- **PENDING REVIEW:** Code generado, dev revisando AC técnicos antes de pasar a QA formal
-- **QA REVIEW:** Build & Test pasando. QA valida desde perspectiva de usuario.
-- **IMPLEMENTED:** QA aprobó, AC verificados, story done.
-- **HAS ISSUES:** QA encontró algo que no funciona correctamente
+- **PENDING REVIEW:** Código generado, dev revisando AC técnicos antes de pasar a QA formal
+- **QA REVIEW:** Build & Test pasando, QA valida desde perspectiva de usuario
+- **IMPLEMENTED:** QA aprobó, AC verificados, story done
+- **HAS ISSUES:** QA encontró algo que no funciona
 
 **Definition of Done:**
-1. Bolt completado (todos los Stage Tasks del Bolt en ✅) ✅
-2. Todos los AC de la story marcados ✅
+1. Todos los Stage Tasks del Bolt en DONE ✅
+2. Todos los AC del checklist marcados ✅
 3. QA validó el comportamiento desde perspectiva de usuario ✅
 
 ---
 
 ### 5.2 Stage Task 📋
 
-Los pasos internos de cada Bolt. Viven como subtasks dentro del Bolt task. Los primeros 4 son condicionales (se crean solo si aplican al Unit); Code Generation y Build and Test siempre se crean.
+Los pasos internos de cada Bolt. Viven como subtasks dentro del Bolt task.
 
-| Campo | Tipo | Para qué |
-|-------|------|----------|
-| Stage | Dropdown (ver abajo) | Qué paso del ciclo AI-DLC es |
-| Repo Link | URL | Link al artefacto generado en `aidlc-docs/` |
-| AI Model | Dropdown: Claude / Q / GPT / Otro | Qué modelo se usó |
+**Custom Field obligatorio:**
+- `Repo Link` — URL a la carpeta del artefacto generado en `aidlc-docs/`
 
-**Stage Dropdown — 6 valores (por Bolt en Construction):**
+**Stage Tasks por Bolt (Construction):**
 ```
-1. Functional Design        → AI modela dominio, entidades y flujos funcionales        [CONDITIONAL]
-2. NFR Requirements         → AI determina NFRs y selecciona tech stack                [CONDITIONAL]
-3. NFR Design               → AI incorpora patrones NFR y componentes lógicos          [CONDITIONAL]
-4. Infrastructure Design    → AI mapea a servicios AWS reales (SAM, DynamoDB, etc.)   [CONDITIONAL]
-5. Code Generation          → AI genera el código, dev revisa                          [ALWAYS]
-6. Build and Test           → AI genera tests, dev ejecuta y valida                    [ALWAYS]
+1. Functional Design        → AI modela dominio, entidades y flujos funcionales     [CONDITIONAL]
+2. NFR Requirements         → AI determina NFRs y selecciona tech stack             [CONDITIONAL]
+3. NFR Design               → AI incorpora patrones NFR y componentes lógicos       [CONDITIONAL]
+4. Infrastructure Design    → AI mapea a servicios AWS reales (SAM, DynamoDB, etc.) [CONDITIONAL]
+5. Code Generation          → AI genera el código, dev revisa                       [ALWAYS]
+6. Build and Test           → AI genera tests, dev ejecuta y valida                 [ALWAYS]
 ```
 
-**Para Inception** (3 Stage Tasks en la lista Inception, no dentro de Bolts):
+**Stage Tasks de Inception** (en la lista Inception, no dentro de un Bolt):
 ```
-1. Elaborate Intent & Requirements
-2. Define User Stories
-3. Plan Units & Application Design
+1. Build Context & Elaborate Intent   → aidlc-docs/inception/requirements/
+2. Define User Stories               → aidlc-docs/inception/user-stories/
+3. Plan Units & Application Design   → aidlc-docs/inception/application-design/
 ```
 
 **Statuses** (template: `ai-dlc-task-flow`):
@@ -151,16 +146,16 @@ Los pasos internos de cada Bolt. Viven como subtasks dentro del Bolt task. Los p
 PENDING → IN PROGRESS → PENDING REVIEW → DONE → NEEDS REWORK
 ```
 
-- **PENDING:** Stage Task existe pero aún no es su turno
-- **IN PROGRESS:** Dev y Claude trabajando juntos en este step
-- **PENDING REVIEW:** Output listo, alguien debe revisar y aprobar antes de continuar
-- **DONE:** Output aprobado, step cerrado
-- **NEEDS REWORK:** Revisión rechazó el output, hay que iterar
+- **PENDING:** Aún no es su turno (espera al Stage Task anterior)
+- **IN PROGRESS:** Dev y Claude trabajando en este stage
+- **PENDING REVIEW:** Artefacto listo, esperando revisión/aprobación
+- **DONE:** Aprobado, stage cerrado
+- **NEEDS REWORK:** Revisión rechazó el output, hay que iterar con Claude
 
-**Quality gates — un Bolt NO puede avanzar al siguiente Stage Task si:**
+**Quality gates — secuencia obligatoria:**
 
-| Stage Task bloqueado | Requiere que esté Done |
-|---------------------|------------------------|
+| Stage Task | Requiere Done anterior |
+|------------|------------------------|
 | NFR Requirements | Functional Design |
 | NFR Design | NFR Requirements |
 | Infrastructure Design | NFR Design |
@@ -171,29 +166,24 @@ PENDING → IN PROGRESS → PENDING REVIEW → DONE → NEEDS REWORK
 
 ### 5.3 Risk ⚠️
 
-| Campo | Tipo |
-|-------|------|
-| Impact | Dropdown: 1–5 |
-| Probability | Dropdown: 1–5 |
-| Mitigation | Text |
-| Blocking | Checkbox |
+**Custom Fields:**
+- `Severity` — Dropdown: Critical / High / Medium / Low
+- `Blocking` — Checkbox
+
+El detalle (descripción del riesgo, mitigación) va en el cuerpo del task.
 
 **Statuses:** `Identified → Mitigating → Resolved / Accepted`
-
-Se crea en el Unit list donde se identifica el riesgo.
 
 ---
 
 ### 5.4 Decision 🏗️
 
-Registra ADRs (Architecture Decision Records) generados durante Construction.
+Registra ADRs generados durante Construction.
 
-| Campo | Tipo |
-|-------|------|
-| Context | Text |
-| Decision | Text |
-| Alternatives | Text |
-| Repo Link | URL → `aidlc-docs/` |
+**Custom Field obligatorio:**
+- `Repo Link` — URL al archivo ADR en `aidlc-docs/`
+
+El contenido del ADR vive en el repo, no en ClickUp. El task es solo el puntero y el estado de aprobación.
 
 **Statuses:** `Proposed → Accepted → Deprecated`
 
@@ -201,11 +191,11 @@ Registra ADRs (Architecture Decision Records) generados durante Construction.
 
 ### 5.5 Bug 🐛
 
-| Campo | Tipo |
-|-------|------|
-| Severity | Dropdown: Critical / High / Medium / Low |
-| Story | Text (US-NNN) |
-| Environment | Dropdown: Dev / Staging / Prod |
+**Custom Fields:**
+- `Severity` — Dropdown: Critical / High / Medium / Low
+- `Environment` — Dropdown: Dev / Staging / Prod
+
+El nombre del task incluye la story afectada: `[Bug] US-003 — descripción del problema`.
 
 **Statuses:** `Reported → Fixing → Verifying → Resolved / Won't Fix`
 
@@ -218,7 +208,7 @@ Se marca como completa una sola vez — al terminar Inception no se toca más.
 
 ```
 📋 Inception
-├── [Stage Task] Elaborate Intent & Requirements  → aidlc-docs/inception/requirements/
+├── [Stage Task] Build Context & Elaborate Intent  → aidlc-docs/inception/requirements/
 ├── [Stage Task] Define User Stories              → aidlc-docs/inception/user-stories/
 └── [Stage Task] Plan Units & Application Design  → aidlc-docs/inception/application-design/
 ```
@@ -365,6 +355,22 @@ Risks:       [Risk] [Descripción]
 Decisions:   [ADR] [Título]
 Bugs:        [Bug] [Descripción concisa]
 ```
+
+**Convención de branches Git:**
+
+```
+main
+ └── release/int-[NNN]-[nombre]         ← Intent (vive hasta que se hace deploy)
+      ├── feature/unit-[NN]-[nombre]    ← Unit / Bolt (se mergea al terminar el Unit)
+      └── feature/unit-[NN]-[nombre]
+```
+
+- `feature/unit-XX` → `release/int-NNN` cuando el Unit está completo (todas sus stories IMPLEMENTED)
+- `release/int-NNN` → `main` cuando el Intent está completo (deploy a producción)
+- Si un Unit tiene varios Bolts: `feature/unit-XX-bolt-N` → `feature/unit-XX` → `release/int-NNN`
+
+**Campo `Commit/PR` en User Story:**
+Apunta al PR del Bolt que implementó esa story. Varias stories pueden apuntar al mismo PR si las cubrió un solo Bolt — es lo esperado.
 
 ---
 

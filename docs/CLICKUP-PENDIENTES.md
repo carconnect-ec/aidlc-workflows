@@ -8,13 +8,13 @@
 
 | # | Qué | Quién | Dónde | Estado |
 |---|-----|-------|-------|--------|
-| 1 | Configurar statuses custom en las listas | Tech Lead | Cada lista → Edit statuses → Use custom statuses | ✅ Hecho (templates creados) |
-| 2 | Crear Goal `INT-001: Sistema de Flujo de Inventario` | PO | Space: Conectividad Automotriz → Goals | ⏳ Pendiente |
-| 3 | Crear folder INT-001 con listas: Inception, Stories, UNIT-01 → UNIT-09 | PO + Tech Lead | Space: Conectividad Automotriz | ⏳ Pendiente |
-| 4 | Poblar lista Inception con 3 Stage Tasks (✅ Done, links al repo) | PO | Folder INT-001 | ⏳ Pendiente |
-| 5 | Poblar lista Stories con las 17 HUs, AC como checklists | PO | Folder INT-001 | ⏳ Pendiente |
-| 6 | Configurar dependencies entre los 9 Unit lists | Tech Lead | Folder INT-001 | ⏳ Pendiente |
-| 7 | Archivar el folder "AI DLC" vacío de GatherLeads | Tech Lead | Space: GatherLeads | ⏳ Pendiente |
+| 1 | Configurar statuses custom en las listas | Tech Lead | Cada lista → Edit statuses → Use custom statuses | ✅ Hecho |
+| 2 | Crear Goal `INT-001: Sistema de Flujo de Inventario` | PO | Space: Conectividad Automotriz → Goals → New Goal | ⏳ Pendiente (manual) |
+| 3 | Crear folder INT-001 con listas: Inception, Stories, UNIT-01 → UNIT-09 | PO + Tech Lead | Space: Conectividad Automotriz | ✅ Hecho |
+| 4 | Poblar lista Inception con 3 Stage Tasks (✅ Done, links al repo) | PO | Folder INT-001 | ✅ Hecho |
+| 5 | Poblar lista Stories con las 17 HUs, AC como checklists | PO | Folder INT-001 | ✅ Hecho |
+| 6 | Configurar dependencies entre los 9 Unit lists | Tech Lead | Folder INT-001 | ✅ UNIT-02→01 configurada. Resto: al crear Bolts de cada Unit |
+| 7 | Archivar el folder "AI DLC" vacío de GatherLeads | Tech Lead | Space: GatherLeads | ⏳ Pendiente (sin urgencia) |
 
 **Templates de statuses creados (reusar en Conectividad Automotriz):**
 
@@ -32,14 +32,14 @@ PENDING → IN PROGRESS → PENDING REVIEW → DONE → NEEDS REWORK
 
 ## Space DEMO "AI-DLC | Cómo Trabajamos"
 
-✅ **Reconstruido con datos reales de ca-backoffice (2026-05-06)**
+✅ **Actualizado y verificado (2026-05-06)**
 
 Estructura actual en ClickUp:
 - Folder `[DEMO] INT-001 — Sistema de Flujo de Inventario`
-- `Inception`: 3 Stage Tasks → DONE (links a aidlc-docs/)
+- `Inception`: 3 Stage Tasks → DONE | nombres: Build Context & Elaborate Intent / Define User Stories / Plan Units & Application Design
 - `Stories`: 17 HUs con AC completos, statuses reales
-- `UNIT-01`: Bolt 1 (US-001, US-002) → DONE + 5 Stage Tasks + stories via multi-list
-- `UNIT-02`: Bolt 1 (US-003, US-005, US-006) → PENDING + 5 Stage Tasks + stories via multi-list
+- `UNIT-01`: Bolt 1 (US-001, US-002) → DONE + 6 Stage Tasks en orden correcto + US-001/002 via multi-list
+- `UNIT-02`: Bolt 1 (US-003, US-005, US-006) → PENDING + 6 Stage Tasks en orden correcto + US-003/005/006 via multi-list
 - `UNIT-03 → 09`: listas vacías con descripción
 
 ---
