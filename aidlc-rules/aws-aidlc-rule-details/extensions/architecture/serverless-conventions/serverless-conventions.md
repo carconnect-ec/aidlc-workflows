@@ -4,6 +4,16 @@
 
 Estas reglas garantizan que los diseños de arquitectura serverless en CarConnect sigan las convenciones establecidas para AWS Lambda, Step Functions, EventBridge, S3 y SQS. Son **hard constraints** que aplican durante NFR & Architecture Design y Code Generation.
 
+### Cuándo aplican estas reglas
+
+**CRÍTICO**: Esta extensión NO decide el stack de una Unit. La decisión de usar serverless (Lambda, AWS SAM) o cualquier otro stack (ECS, EC2, etc.) ocurre orgánicamente durante NFR & Architecture Design, basándose en los requisitos de esa Unit específica.
+
+**Regla de activación por Unit**:
+- Si el diseño de NFR de esta Unit incluye Lambda o AWS SAM como cómputo → aplicar todas las reglas SRVLS como bloqueantes
+- Si el diseño de NFR de esta Unit usa ECS, EC2 u otro compute → marcar **todas** las reglas SRVLS como **N/A** para esta Unit. No es un hallazgo bloqueante.
+
+El modelo evalúa esto en el momento en que se propone la arquitectura — no antes.
+
 ### Comportamiento ante incumplimiento
 
 Un **incumplimiento de convención serverless** significa:
@@ -16,11 +26,11 @@ Si una regla SRVLS no aplica al artefacto actual (ej. la Unit no tiene flujos mu
 
 ### Enforcement por defecto
 
-Todas las reglas de este documento son **bloqueantes** por defecto.
+Todas las reglas de este documento son **bloqueantes** por defecto, condicionado a que la Unit use serverless como stack (ver "Cuándo aplican estas reglas" arriba).
 
 ### Stages donde aplican
 
-- **NFR & Architecture Design**: verificar que el diseño propuesto respeta las convenciones antes de aprobar
+- **NFR & Architecture Design**: una vez decidida la arquitectura de la Unit, verificar que el diseño respeta las convenciones
 - **Code Generation**: verificar que el código generado no viola las convenciones
 
 ---
