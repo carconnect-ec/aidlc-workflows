@@ -1,289 +1,428 @@
-# AI-DLC en ClickUp — Guía de Implementación CarConnect
+# AI-DLC en ClickUp — Framework Empresa CarConnect
 
-> ClickUp como command center para coordinar y dar visibilidad al desarrollo AI-DLC across múltiples repos, Intents y Units.
+> ClickUp como command center para gestionar desarrollo AI-DLC: visibilidad de producto, ejecución técnica, QA y coordinación cross-producto en todas las líneas de CarConnect.
 
 **Fecha:** 2026-05-05
-**Estado:** Draft v2
+**Estado:** v2.0
 
 ---
 
 ## 1. Filosofía
 
-**El repo (`aidlc-docs/`) es el source of truth.** Ahí viven los artefactos: requirements, designs, code summaries.
+**Repo (`aidlc-docs/`) = source of truth** de artefactos técnicos.
+**ClickUp = gestión de producto** — estado, asignaciones, dependencias, QA, métricas.
 
-**ClickUp es el panel de control** para:
-- Ver en qué fase va cada Intent/Unit/Bolt sin abrir repos
-- Saber quién valida qué y cuándo
-- Links directos a los artefactos en GitHub
-- Coordinar cuando hay múltiples Intents en paralelo
-- Vista ejecutiva para stakeholders
-- Detectar bloqueos y dependencias
+ClickUp responde las preguntas del PO:
+- ¿Qué stories están implementadas y cuáles no?
+- ¿En qué Unit estamos y cuántos Bolts lleva?
+- ¿Quién trabaja en qué y qué está bloqueado?
+- ¿Cuánto falta y cuándo podemos hacer QA?
+- ¿Cómo están avanzando todas las líneas de producto?
 
 **Reglas:**
-1. **Link, no duplicar** — Cada task tiene URL al archivo en el repo
-2. **Track estado, no contenido** — ClickUp dice "en qué fase está", el repo dice "qué se hizo"
-3. **Mínimo overhead** — Si crear el task toma más que hacer el trabajo, algo está mal
-4. **Escalar** — Funciona igual con 1 Intent que con 50
+1. **Link, no duplicar** — Tasks apuntan al repo, no copian contenido
+2. **Stories son la unidad de valor** — Lo que el PO gestiona y valida
+3. **Bolts son la unidad de ejecución** — Lo que el dev ejecuta dentro de un Unit
+4. **Mínimo overhead** — Actualizar ClickUp no debe tomar más de 2 min por sesión
+5. **Escalar** — Funciona con 1 producto o con 10 en paralelo
 
 ---
 
-## 2. Jerarquía en ClickUp
+## 2. Los 3 artefactos del framework
+
+| Artefacto | Qué es | Quién lo maneja | En ClickUp |
+|-----------|--------|-----------------|------------|
+| **Intent** | Objetivo de negocio de alto nivel | PO | Goal |
+| **Unit** | Bloque cohesivo de trabajo derivado del Intent. Análogo a un Epic o Subdominio. Contiene las User Stories que lo implementan. | PO + Dev | List dentro del folder INT-NNN |
+| **Bolt** | Mini-sprint (horas a 1-3 días) que implementa un subconjunto de stories de un Unit, pasando por el ciclo completo: diseño → código → QA. Un Unit tiene 1 o más Bolts. | Dev | Task dentro del Unit list |
+
+**Importante:** Los Bolts no son fases (Diseño, Infra, Build). Son ciclos de ejecución que cada uno implementa stories de principio a fin. Dentro de cada Bolt hay un ciclo fijo de 5 pasos (Stage Tasks).
+
+---
+
+## 3. Estructura del Workspace
 
 ```
 Workspace: CarConnect
-└── Space: Conectividad Automotriz
-    │
-    ├── 📊 Goal: "INT-001: Flujo de Inventario (ca-backoffice)"
-    │   ├── Target: 9 Units completados
-    │   ├── Target: Deploy en producción
-    │   └── Link: github.com/carconnect-ec/ca-backoffice
-    │
-    ├── 📁 Folder: INT-001 Inception
-    │   └── List: Inception Stages
-    │       ├── Task: "Requirements Analysis" ✅ — link → inception/requirements/
-    │       ├── Task: "User Stories (17)" ✅ — link → inception/user-stories/
-    │       ├── Task: "Application Design" ✅ — link → inception/application-design/
-    │       └── Task: "Units Generation (9 units)" ✅ — link → inception/plans/
-    │
-    ├── 📁 Sprint Folder: UNIT-01 Auth & Users ✅ COMPLETE
-    │   ├── Sprint: "Functional Design" ✅ Done — link → construction/unit-01/functional-design/
-    │   ├── Sprint: "NFR Req + Design" ✅ Done — link → construction/unit-01/nfr-*/
-    │   ├── Sprint: "Infra Design" ✅ Done — link → construction/unit-01/infrastructure-design/
-    │   └── Sprint: "Code Generation" ✅ Done — link → commit 24af5fe
-    │
-    ├── 📁 Sprint Folder: UNIT-02 Batch & Document 🔨 ACTIVE
-    │   ├── Sprint: "Functional Design" 🤖 AI Generating
-    │   ├── Sprint: "NFR Requirements" 📋 Backlog
-    │   ├── Sprint: "NFR Design" 📋 Backlog
-    │   ├── Sprint: "Infra Design" 📋 Backlog
-    │   └── Sprint: "Code Generation" 📋 Backlog
-    │
-    ├── 📁 Sprint Folder: UNIT-03 Scanning & Verification 📋 PENDING
-    ├── 📁 Sprint Folder: UNIT-04 Novelty Management 📋 PENDING
-    ├── 📁 Sprint Folder: UNIT-05 Webhooks & Integration 📋 PENDING
-    ├── 📁 Sprint Folder: UNIT-06 Notifications 📋 PENDING
-    ├── 📁 Sprint Folder: UNIT-07 Finance / Kairos 📋 PENDING
-    ├── 📁 Sprint Folder: UNIT-08 Dashboard & Search 📋 PENDING
-    └── 📁 Sprint Folder: UNIT-09 Frontend Backoffice 📋 PENDING
+│
+├── 🎯 Goals              ← Portfolio view: todos los Intents de todas las líneas
+│
+├── Space: GatherLeads
+├── Space: Conectividad Automotriz
+├── Space: Software Factory
+└── Space: [Nueva Línea]
+
+Dentro de cada Space:
+├── 📋 Product Backlog    ← bugs, features sin Intent, mejoras técnicas
+│
+└── 📁 INT-001 [Nombre del outcome de negocio]
+    ├── 📋 Inception       ← 3 Stage Tasks de la fase Inception (se cierran al terminar)
+    ├── 📋 Stories         ← TODAS las stories del Intent, vista del PO
+    ├── 📋 UNIT-01 [nombre] ← Ejecución: Bolts + stories via multi-list
+    ├── 📋 UNIT-02 [nombre]
+    └── 📋 UNIT-0N [nombre]
 ```
 
 ---
 
-## 3. Tipos de Tasks (Custom Task Types)
+## 4. Goals (Intents)
 
-Solo 4 tipos. Simples.
+Cada Intent = un Goal con targets medibles. Es el portfolio view del CTO/CEO.
 
-### 3.1 Stage Task 📋
+| Campo | Ejemplo — Conectividad Automotriz |
+|-------|----------------------------------|
+| Nombre | INT-001: Sistema de Flujo de Inventario de Dispositivos |
+| Owner | PO responsable |
+| Due date | Fecha target de entrega |
+| Repo link | `ca-backoffice` |
+| Target 1 | Units completados (X/9) |
+| Target 2 | Stories implementadas (X/17) |
+| Target 3 | Deploy producción (Sí/No) |
 
-**Propósito:** Representa un stage del workflow AI-DLC (Functional Design, NFR, Code Gen, etc.)
+---
+
+## 5. Custom Task Types (5 tipos — nivel workspace)
+
+> Se crean una sola vez y aplican a todos los Spaces.
+
+### 5.1 User Story 📖
+
+La unidad de valor. Lo que el PO gestiona, valida y reporta.
 
 | Campo | Tipo | Para qué |
 |-------|------|----------|
-| Phase | Dropdown: Inception / Construction / Operations | Filtrar por fase |
-| Repo Link | URL | Link directo al folder/archivo en GitHub |
-| PR Link | URL | Link al PR si generó código |
-| AI Model | Dropdown: Claude / Q / GPT | Qué modelo generó el artefacto |
-| Validated By | People | Quién aprobó |
-| Validation Date | Date | Cuándo se aprobó |
+| ID | Text | US-001, US-002... |
+| Persona | Dropdown | Quién usa esta funcionalidad |
+| Priority | Dropdown: Must / Should / Could | MoSCoW |
+| Unit | Text | Qué Unit la implementa |
+| Commit/PR | URL | Link al código que la implementa |
 
-**Statuses:**
+**Criterios de Aceptación:** Checklist dentro del task (cada item = un criterio verificable).
+
+**Statuses** (template: `ai-dlc-stories`):
 ```
-📋 Pending → 🤖 AI Generating → 👁️ Pending Review → ✅ Approved → 🚫 Needs Rework
+NOT STARTED → READY FOR DEV → IN DEVELOPMENT → QA REVIEW → IMPLEMENTED → HAS ISSUES
 ```
 
-### 3.2 Risk ⚠️
+- **NOT STARTED:** El Unit que implementa esta story aún no puede arrancar
+- **READY FOR DEV:** Las dependencias del Unit están resueltas. El dev puede arrancar.
+- **IN DEVELOPMENT:** El Bolt activo está implementando esta story
+- **PENDING REVIEW:** Code generado, dev revisando AC técnicos antes de pasar a QA formal
+- **QA REVIEW:** Build & Test pasando. QA valida desde perspectiva de usuario.
+- **IMPLEMENTED:** QA aprobó, AC verificados, story done.
+- **HAS ISSUES:** QA encontró algo que no funciona correctamente
+
+**Definition of Done:**
+1. Bolt completado (todos los Stage Tasks del Bolt en ✅) ✅
+2. Todos los AC de la story marcados ✅
+3. QA validó el comportamiento desde perspectiva de usuario ✅
+
+---
+
+### 5.2 Stage Task 📋
+
+Los 5 pasos internos de cada Bolt. Viven como subtasks dentro del Bolt task.
+
+| Campo | Tipo | Para qué |
+|-------|------|----------|
+| Stage | Dropdown (ver abajo) | Qué paso del ciclo AI-DLC es |
+| Repo Link | URL | Link al artefacto generado en `aidlc-docs/` |
+| AI Model | Dropdown: Claude / Q / GPT / Otro | Qué modelo se usó |
+
+**Stage Dropdown — 5 valores (por Bolt en Construction):**
+```
+1. Domain & Functional Design   → AI modela el dominio y flujos funcionales
+2. NFR & Architecture Design    → AI define NFRs y arquitectura, dev valida ADRs
+3. Code Generation              → AI genera el código, dev revisa
+4. Build & Test                 → AI genera tests, dev ejecuta y valida
+5. QA Review                    → QA valida stories desde perspectiva de usuario
+```
+
+**Para Inception** (3 Stage Tasks en la lista Inception, no dentro de Bolts):
+```
+1. Elaborate Intent & Requirements
+2. Define User Stories
+3. Plan Units & Application Design
+```
+
+**Statuses** (template: `ai-dlc-task-flow`):
+```
+PENDING → IN PROGRESS → PENDING REVIEW → DONE → NEEDS REWORK
+```
+
+- **PENDING:** Stage Task existe pero aún no es su turno
+- **IN PROGRESS:** Dev y Claude trabajando juntos en este step
+- **PENDING REVIEW:** Output listo, alguien debe revisar y aprobar antes de continuar
+- **DONE:** Output aprobado, step cerrado
+- **NEEDS REWORK:** Revisión rechazó el output, hay que iterar
+
+**Quality gates — un Bolt NO puede avanzar al siguiente Stage Task si:**
+
+| Stage Task bloqueado | Requiere que esté Done |
+|---------------------|------------------------|
+| NFR & Architecture Design | Domain & Functional Design |
+| Code Generation | NFR & Architecture Design |
+| Build & Test | Code Generation |
+| QA Review | Build & Test |
+
+---
+
+### 5.3 Risk ⚠️
 
 | Campo | Tipo |
 |-------|------|
-| Impact | Dropdown: 1-5 |
-| Probability | Dropdown: 1-5 |
+| Impact | Dropdown: 1–5 |
+| Probability | Dropdown: 1–5 |
 | Mitigation | Text |
 | Blocking | Checkbox |
 
 **Statuses:** `Identified → Mitigating → Resolved / Accepted`
 
-### 3.3 Decision 🏗️
+Se crea en el Unit list donde se identifica el riesgo.
+
+---
+
+### 5.4 Decision 🏗️
+
+Registra ADRs (Architecture Decision Records) generados durante Construction.
 
 | Campo | Tipo |
 |-------|------|
 | Context | Text |
 | Decision | Text |
 | Alternatives | Text |
-| Repo Link | URL (al ADR en el repo si existe) |
+| Repo Link | URL → `aidlc-docs/` |
 
 **Statuses:** `Proposed → Accepted → Deprecated`
 
-### 3.4 Bug 🐛
+---
+
+### 5.5 Bug 🐛
 
 | Campo | Tipo |
 |-------|------|
-| Severity | Dropdown: Critical/High/Medium/Low |
-| Unit | Relationship → Sprint Folder |
-| Environment | Dropdown |
+| Severity | Dropdown: Critical / High / Medium / Low |
+| Story | Text (US-NNN) |
+| Environment | Dropdown: Dev / Staging / Prod |
 
-**Statuses:** `Reported → Fixing → Resolved`
-
----
-
-## 4. Cómo se usa día a día
-
-### Cuando arranca un nuevo Intent:
-
-1. Crear **Goal** con nombre, deadline, link al repo
-2. Crear **Folder "Inception"** con tasks por cada stage
-3. AI-DLC corre en el IDE → genera artefactos en `aidlc-docs/`
-4. Dev actualiza el **status del task** en ClickUp y pega el **link al archivo**
-5. PO revisa, aprueba → status cambia a ✅
-
-### Cuando se definen los Units:
-
-1. Crear un **Sprint Folder** por cada Unit
-2. Dentro, crear **tasks** por cada stage de Construction (Functional Design, NFR, etc.)
-3. Cada task es un "Bolt" — se ejecuta en 1-3 días
-
-### Cuando se ejecuta un Bolt:
-
-1. Dev abre el task, ve el link al plan en el repo
-2. Ejecuta AI-DLC en el IDE
-3. AI genera artefactos → dev valida
-4. Dev actualiza: status ✅, pega link al output, pega link al PR/commit
-5. Siguiente task
-
-### Cuando algo se bloquea:
-
-1. Crear task tipo **Risk** en el Sprint Folder del Unit
-2. Marcar como "Blocking"
-3. Asignar al responsable de resolver
-4. Cuando se resuelve → status "Resolved" + link a la solución
+**Statuses:** `Reported → Fixing → Verifying → Resolved / Won't Fix`
 
 ---
 
-## 5. Automaciones
+## 6. Lista: Inception
+
+Una lista `Inception` por Intent. Contiene los 3 Stage Tasks de la fase Inception.
+Se marca como completa una sola vez — al terminar Inception no se toca más.
+
+```
+📋 Inception
+├── [Stage Task] Elaborate Intent & Requirements  → aidlc-docs/inception/requirements/
+├── [Stage Task] Define User Stories              → aidlc-docs/inception/user-stories/
+└── [Stage Task] Plan Units & Application Design  → aidlc-docs/inception/application-design/
+```
+
+Cada Stage Task tiene un checklist de outputs que el PO valida antes de marcar como Done.
+
+---
+
+## 7. Lista: Stories (vista del PO)
+
+Una sola lista `Stories` dentro del folder INT-NNN. Contiene TODAS las stories del Intent.
+
+- Agrupadas visualmente por Unit (usando secciones o un campo "Unit")
+- El PO gestiona aquí: ve el status de cada story, los AC, quién la tiene asignada
+- Cuando un Unit arranca, las stories de ese Unit se agregan también al Unit list via **"Add to multiple lists"** — la misma task aparece en dos lugares sin duplicación
+
+```
+📋 Stories — INT-001
+
+[UNIT-01 — Auth & Users]
+  US-001 Crear y gestionar usuarios    ✅ Implemented
+  US-002 Login con control de acceso   ✅ Implemented
+
+[UNIT-02 — Batch & Document]
+  US-003 Crear lote de recepción       🟢 Ready for Dev
+  US-005 Cargar doc SINOCASTEL         🟢 Ready for Dev
+  US-006 Cargar doc TELTONIKA          🟢 Ready for Dev
+
+[UNIT-03 → 09]
+  US-004, 007–017                      📋 Not Started
+```
+
+**Flujo de validación de AC:**
+1. Dev implementa story dentro del Bolt → marca AC técnicos
+2. Dev mueve story a `🧪 QA Review`
+3. QA valida AC desde perspectiva de usuario
+4. Si aprueba → `✅ Implemented`
+5. Si encuentra issue → crea task tipo Bug, story vuelve a `🔨 In Development`
+
+---
+
+## 8. Listas de Ejecución (una por Unit)
+
+Una lista por Unit dentro del folder INT-NNN. Aquí vive la ejecución técnica.
+
+**Qué contiene cada Unit list:**
+- **Bolt tasks** — cada Bolt cubre un subconjunto de stories del Unit
+- **Stage Tasks** — 5 subtasks dentro de cada Bolt (el ciclo interno de Construction)
+- **Stories** — las mismas stories del Unit aparecen aquí via "Add to multiple lists"
+- **Risks y Decisions** — si surgen durante el trabajo del Unit
+
+**Los Bolts los define el dev al arrancar el Unit.** No se crean de antemano. El dev + AI planean cuántos Bolts necesita el Unit y qué stories cubre cada uno.
+
+```
+📋 UNIT-02 — Batch & Document
+
+  Bolt 1 — US-003, US-005, US-006  🔨 In Development
+    ↳ [Stage Task] Domain & Functional Design  ✅ Done → aidlc-docs/.../functional-design/
+    ↳ [Stage Task] NFR & Architecture Design   🔨 In Progress
+    ↳ [Stage Task] Code Generation             📋 Pending
+    ↳ [Stage Task] Build & Test                📋 Pending
+    ↳ [Stage Task] QA Review                   📋 Pending
+
+  US-003 Crear lote de recepción   🔨 In Development  ← misma task de Stories list
+  US-005 Cargar doc SINOCASTEL     🟢 Ready for Dev   ← via "Add to multiple lists"
+  US-006 Cargar doc TELTONIKA      🟢 Ready for Dev
+```
+
+**Convención de nombre de Bolt:** `Bolt N — [stories que cubre]`
+Ejemplos: `Bolt 1 — US-003, US-005, US-006` / `Bolt 2 — US-009, US-010`
+
+---
+
+## 9. Dependencias
+
+Se configuran como **Dependencies** entre Unit lists.
+
+**Ejemplo — Conectividad Automotriz (9 Units):**
+```
+UNIT-01 Auth & Users ✅
+    └── UNIT-02 Batch & Document
+            └── UNIT-03 Scanning & Verification
+                    ├── UNIT-04 Novelty Management ──┐
+                    ├── UNIT-05 Webhooks & Integration│
+                    ├── UNIT-07 Finance / Kairos      ├── UNIT-09 Frontend
+                    └── UNIT-08 Dashboard & Search ───┘
+                            └── UNIT-06 Notifications (depende de UNIT-05)
+```
+
+**Critical path:** UNIT-01 → 02 → 03 → 05 → 06
+
+Cuando un Unit se completa (todas sus stories en ✅ Implemented), las stories del siguiente Unit pasan automáticamente a `🟢 Ready for Dev`.
+
+---
+
+## 10. Automaciones
 
 | Trigger | Acción |
 |---------|--------|
-| Todos los tasks de un Sprint Folder en ✅ | Marcar Goal target como completado |
-| Task en "Pending Review" > 24h | Reminder al reviewer |
-| Task tipo Risk con "Blocking" = true | Notificar al Tech Lead |
-| Nuevo Sprint Folder creado | Crear tasks template (Functional Design, NFR Req, NFR Design, Infra, Code Gen) |
+| Unit list completada (todas stories ✅) | Stories del Unit dependiente → `🟢 Ready for Dev` |
+| Story movida a `✅ Implemented` | Actualizar Goal target (stories counter +1) |
+| Stage Task `QA Review` → Done | Story del Bolt → `🧪 QA Review` |
+| Risk con `Blocking = true` creado | Notificar PO + Tech Lead |
 
 ---
 
-## 6. Dashboards
+## 11. Dashboards
 
-### Command Center (equipo)
+### Dashboard PO: "Estado del Producto"
 
-| Widget | Datos |
-|--------|-------|
-| Goals progress | % de cada Intent |
-| Active Units | Sprint Folders con tasks en progreso |
-| Pending Reviews | Tasks en status "Pending Review" |
-| Blocked | Tasks tipo Risk con Blocking=true |
-| Recent completions | Tasks movidos a ✅ últimas 48h |
+| Widget | Qué muestra |
+|--------|-------------|
+| Goal progress | % del Intent actual (stories implementadas / total) |
+| Stories by status | Implemented / QA / In Dev / Ready / Not Started |
+| Blocked stories | Stories esperando que dependencias terminen |
+| Next actions | Stories en Ready for Dev |
+| Risks abiertos | Tasks tipo Risk activos |
 
-### Stakeholder View
+### Dashboard Dev: "Ejecución"
 
-| Widget | Datos |
-|--------|-------|
-| Intent progress bars | Goals con % |
-| Units timeline | Gantt de Sprint Folders |
-| Risks abiertos | Count de risks no resueltos |
+| Widget | Qué muestra |
+|--------|-------------|
+| Active Bolt | Bolt en curso con Stage Tasks y statuses |
+| Pending reviews | Stage Tasks en Pending Review |
+| Velocity | Días por Unit (histórico) |
 
----
+### Dashboard Portfolio: "Todas las Líneas"
 
-## 7. Convenciones de nombres
-
-```
-Goals:          INT-[NNN]: [Descripción] ([repo])
-Folders:        INT-[NNN] Inception
-Sprint Folders: UNIT-[NN] [Nombre del bounded context]
-Tasks:          [Stage name] — ej. "Functional Design", "Code Generation"
-Risks:          [Risk] [Descripción corta]
-Decisions:      [ADR] [Decisión en una línea]
-```
+Activar cuando haya ≥2 líneas con al menos 1 Unit completado.
 
 ---
 
-## 8. Ejemplo real: ca-backoffice mapeado
+## 12. Convenciones
 
-Basado en el `aidlc-state.md` actual del proyecto:
-
-### Goal
 ```
-INT-001: Flujo de Inventario (ca-backoffice)
-├── Owner: [PO]
-├── Repo: github.com/carconnect-ec/ca-backoffice
-├── Target: 9/9 Units completados → actualmente 1/9
-├── Status: Construction Phase — Unit 02 next
+Goals:       INT-[NNN]: [Outcome de negocio]
+Folders:     INT-[NNN] [Nombre del outcome]
+Lists:       Inception / Stories / UNIT-[NN] [nombre del bounded context]
+Bolts:       Bolt [N] — [US-NNN, US-NNN] (stories que cubre)
+Stories:     US-[NNN] — [Descripción corta]
+Stage Tasks: [Nombre del stage]  (Domain & Functional Design, Code Generation, etc.)
+Risks:       [Risk] [Descripción]
+Decisions:   [ADR] [Título]
+Bugs:        [Bug] [Descripción concisa]
 ```
-
-### Inception Folder (todo ✅)
-```
-INT-001 Inception
-├── ✅ Requirements Analysis (11 FR, 6 NFR) → link: inception/requirements/
-├── ✅ User Stories (17 stories, 4 personas) → link: inception/user-stories/
-├── ✅ Workflow Planning → link: inception/plans/execution-plan.md
-├── ✅ Application Design (14 components, 6 services) → link: inception/application-design/
-└── ✅ Units Generation (9 units, 4 phases) → link: inception/plans/unit-of-work-plan.md
-```
-
-### Sprint Folders (Units)
-```
-UNIT-01 Auth & Users ✅ COMPLETE
-├── ✅ Functional Design → link: construction/unit-01/functional-design/
-├── ✅ NFR Requirements → link: construction/unit-01/nfr-requirements/
-├── ✅ NFR Design → link: construction/unit-01/nfr-design/
-├── ✅ Infrastructure Design → link: construction/unit-01/infrastructure-design/
-└── ✅ Code Generation (58 files) → link: commit 24af5fe, branch feature/inventarios
-
-UNIT-02 Batch & Document 🔨 NEXT
-├── 📋 Functional Design
-├── 📋 NFR Requirements
-├── 📋 NFR Design
-├── 📋 Infrastructure Design
-└── 📋 Code Generation
-
-UNIT-03 through UNIT-09: 📋 PENDING (same structure)
-```
-
-### Extensions habilitadas (como tags o custom field)
-- Git Conventions ✅
-- Security Baseline ✅
-- Data Privacy (user mgmt only) ✅
-- Property-Based Testing (partial) ✅
-- Search/Inventory Performance ✅
 
 ---
 
-## 9. Plan de implementación
+## 13. Flujo completo (lifecycle de un Intent)
 
-| Día | Qué hacer |
-|-----|-----------|
-| 1 | Crear Space, habilitar Sprint ClickApp, crear Custom Task Types (4) |
-| 2 | Crear Goal INT-001, Folder Inception, Sprint Folders para los 9 Units |
-| 3 | Poblar tasks del Unit-01 (ya completado) con links reales al repo |
-| 4 | Configurar automaciones (template al crear Sprint Folder, reminders) |
-| 5 | Dashboard Command Center + Stakeholder View |
-| 6 | Probar con Unit-02 en vivo — ajustar lo que no funcione |
-
----
-
-## 10. Pricing mínimo
-
-**Business Plan ($12/user/mes)** — necesario para:
-- Custom Task Types
-- Sprint ClickApp
-- Goals con rollups
-- Automaciones avanzadas
-
-Para equipo de 5: **$60/mes**
+```
+1.  PO escribe Vision Document → entrega al dev
+2.  Dev ejecuta AI-DLC Inception → genera artefactos en aidlc-docs/
+3.  PO crea Goal en ClickUp + folder INT-NNN
+4.  PO crea lista Inception con 3 Stage Tasks → valida y marca Done
+5.  PO crea lista Stories con todas las HUs y sus AC
+6.  PO crea listas UNIT-01 → UNIT-NN (vacías inicialmente)
+7.  PO configura dependencies entre Unit lists
+8.  Dev arranca UNIT-01: planea Bolts con AI, crea Bolt tasks en UNIT-01 list
+9.  Dev agrega stories del Unit a UNIT-01 list via "Add to multiple lists"
+10. Dev ejecuta cada Bolt: 5 Stage Tasks en secuencia (diseño → código → QA)
+11. Al terminar Code Generation → dev marca AC técnicos en stories
+12. QA valida → stories a ✅ Implemented
+13. Al completar todas las stories de un Unit → siguiente Unit pasa a Ready for Dev
+14. Repetir para todos los Units
+15. Cuando todas las stories → Goal target met → Deploy
+```
 
 ---
 
-## 11. Lo que NO hacemos
+## 14. Plan de Rollout
 
-- ❌ No duplicamos contenido de `aidlc-docs/` en ClickUp
-- ❌ No usamos ClickUp Docs para diseño (eso vive en el repo)
-- ❌ No trackeamos story points (usamos tiempo real si acaso)
-- ❌ No creamos subtasks infinitos (máximo Task → Checklist)
-- ❌ No forzamos a que cada archivo del repo tenga un task (solo stages principales)
+### Fase 0 — Setup empresa (una sola vez)
+
+| # | Acción | Responsable |
+|---|--------|-------------|
+| 1 | Crear 5 Custom Task Types en el workspace | Tech Lead |
+| 2 | Espacio DEMO "AI-DLC \| Cómo Trabajamos" con estructura de referencia | Tech Lead + PO |
+| 3 | Demo de 30 min al equipo | Todos |
+
+### Fase 1 — Piloto en Conectividad Automotriz (INT-001, en curso)
+
+- Crear Goal `INT-001: Sistema de Flujo de Inventario de Dispositivos`
+- Crear folder + lista Inception (3 Stage Tasks → Approved, ya en repo)
+- Crear lista Stories con las 17 HUs y sus AC
+- Crear listas UNIT-01 (done) → UNIT-09 con las dependencias configuradas
+- Dev crea Bolts en UNIT-02 al arrancar
+
+**Punto de revisión:** Al terminar UNIT-03 → ¿qué ajustar?
+
+### Fase 2 — Extensión a nuevas líneas
+
+Cada Intent nuevo arranca con la estructura completa desde el día uno.
+
+### Fase 3 — Portfolio view
+
+Cuando haya ≥2 líneas activas: activar Dashboard Portfolio.
+
+---
+
+## 15. Lo que NO hacemos
+
+- ❌ No duplicamos contenido de `aidlc-docs/`
+- ❌ No usamos ClickUp Docs para diseño técnico (eso vive en el repo)
+- ❌ No creamos un task por cada archivo del repo
+- ❌ No forzamos al dev a escribir en ClickUp lo que ya está en aidlc-state.md
+- ❌ No creamos Bolts de antemano — los define el dev al arrancar el Unit
+- ❌ No nombramos Bolts por fase (B001-Design, B002-Infra) — los Bolts cubren stories, no fases
+- ❌ No retrofitteamos Intents ya terminados
