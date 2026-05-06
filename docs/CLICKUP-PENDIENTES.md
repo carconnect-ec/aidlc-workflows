@@ -59,9 +59,9 @@ La IA ayuda a planear. El dev decide y crea los Bolt tasks en la lista UNIT-02.
 
 | # | Qué revisar |
 |---|-------------|
-| 1 | ¿Los 5 Stage Tasks por Bolt son suficientes o sobran? |
+| 1 | ¿Los 6 Stage Tasks por Bolt son suficientes o sobran? |
 | 2 | ¿El "Add to multiple lists" funcionó bien en la práctica? |
-| 3 | ¿QA Review como Stage Task funciona o prefieren otro mecanismo? |
+| 3 | ¿QA Review como status de story (no Stage Task) funciona bien en práctica? |
 | 4 | ¿Qué hacer con GatherLeads? — retroactivo o solo intents nuevos |
 
 ---
